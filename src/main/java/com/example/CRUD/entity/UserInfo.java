@@ -19,6 +19,13 @@ public class UserInfo {
     private String profilePic ;
     private String phone ;
     private String location ;
+    
+    private String bio;
+    private String website;
+    private String headerPic;
+    private boolean verified;
+    private String twoFactorSecret;
+    private boolean twoFactorEnabled;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

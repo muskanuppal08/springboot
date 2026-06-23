@@ -43,6 +43,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = jwtUtil.extractUsername(token);
                 String role = jwtUtil.extractRole(token);
 
+                if ("2FA_PENDING".equals(role)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 if (role != null && !role.startsWith("ROLE_")) {
                     role = "ROLE_" + role;
                 }

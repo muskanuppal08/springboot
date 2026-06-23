@@ -35,12 +35,42 @@
                     <input type="text" id="login-username" placeholder="e.g. johndoe" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-password">Password</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="login-password" style="margin-bottom: 0;">Password</label>
+                        <a href="#" id="forgot-password-link" style="font-size: 0.8rem; color: var(--primary); text-decoration: none;">Forgot Password?</a>
+                    </div>
                     <input type="password" id="login-password" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                <div class="auth-footer">
+                
+                <div class="oauth-divider">
+                    <span>or connect with</span>
+                </div>
+                <div class="oauth-buttons">
+                    <a href="/oauth2/authorization/google" class="btn btn-oauth btn-google">
+                        <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" style="width: 18px; height: 18px;"> Google
+                    </a>
+                    <a href="/oauth2/authorization/github" class="btn btn-oauth btn-github">
+                        <svg viewBox="0 0 16 16" width="18" height="18" style="fill: currentColor;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg> GitHub
+                    </a>
+                </div>
+
+                <div class="auth-footer" style="margin-top: 15px;">
                     Don't have an account? <a href="#" id="go-to-register">Register here</a>
+                </div>
+            </form>
+
+            <!-- 2FA Verification Form -->
+            <form id="2fa-form" class="auth-form hidden">
+                <div class="form-group" style="text-align: center;">
+                    <span style="font-size: 2rem; display: block; margin-bottom: 10px;">🔒</span>
+                    <label for="login-2fa-code" style="font-weight: 600; font-size: 0.95rem;">Two-Factor Verification</label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Enter the 6-digit verification code from your authenticator app.</p>
+                    <input type="text" id="login-2fa-code" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" style="text-align: center; font-size: 1.25rem; letter-spacing: 0.5rem; padding-left: 0.5rem;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Verify & Continue</button>
+                <div class="auth-footer" style="margin-top: 15px;">
+                    <a href="#" id="2fa-cancel" style="color: var(--text-muted); text-decoration: none;">Back to Sign In</a>
                 </div>
             </form>
 
@@ -113,19 +143,27 @@
             
             <!-- Left Sidebar -->
             <aside class="sidebar-left">
-                <div class="card profile-card">
-                    <div class="profile-header-bg"></div>
+                <div class="card profile-card" style="position: relative; overflow: hidden;">
+                    <div class="profile-header-bg" id="profile-header-pic" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; height: 100px;"></div>
                     <div class="profile-avatar-container">
                         <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
                     </div>
                     <div class="profile-info">
-                        <h3 id="profile-fullname">John Doe</h3>
+                        <h3 style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span id="profile-fullname">John Doe</span>
+                            <span id="profile-verified-badge" class="verified-badge hidden" title="Verified Account">💙</span>
+                        </h3>
                         <p id="profile-handle">@johndoe</p>
+                        <p id="profile-bio" class="profile-bio-text" style="font-size: 0.85rem; color: var(--text-light); margin: 8px 0 12px; font-style: italic;"></p>
                         
                         <div class="profile-details-list">
                             <div class="detail-item">
                                 <span class="detail-icon">📍</span>
                                 <span id="profile-loc">Planet Earth</span>
+                            </div>
+                            <div class="detail-item" id="profile-website-container">
+                                <span class="detail-icon">🔗</span>
+                                <a id="profile-website" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;">website.com</a>
                             </div>
                             <div class="detail-item">
                                 <span class="detail-icon">📞</span>
@@ -134,7 +172,7 @@
                         </div>
 
                         <!-- Visibility Switch -->
-                        <div class="visibility-toggle-container">
+                        <div class="visibility-toggle-container" style="margin-top: 15px;">
                             <span class="toggle-label">Public Profile</span>
                             <label class="switch">
                                 <input type="checkbox" id="profile-visibility-toggle">
@@ -142,6 +180,7 @@
                             </label>
                         </div>
 
+                        <button id="profile-2fa-btn" class="btn btn-secondary btn-block btn-sm" style="margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">🔒 Configure 2FA</button>
                         <button id="edit-profile-btn" class="btn btn-outline btn-block btn-sm">Edit Details</button>
                     </div>
                 </div>
@@ -291,7 +330,105 @@
                     <label for="edit-profile-pic">Profile Picture URL</label>
                     <input type="url" id="edit-profile-pic">
                 </div>
+                <div class="form-group">
+                    <label for="edit-header-pic">Header Image URL</label>
+                    <input type="url" id="edit-header-pic">
+                </div>
+                <div class="form-group">
+                    <label for="edit-bio">Biography</label>
+                    <textarea id="edit-bio" rows="2" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-website">Website URL</label>
+                    <input type="url" id="edit-website" placeholder="https://mywebsite.com">
+                </div>
                 <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2FA Settings Modal -->
+    <div id="2fa-setup-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-2fa-modal">&times;</span>
+            <h4>Two-Factor Authentication</h4>
+            
+            <!-- 2FA Setup State (Disabled -> Enable) -->
+            <div id="2fa-setup-enable-view">
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
+                    Enhance your account security by enabling Two-Factor Authentication. Scan the QR code or enter the key manually into your Google Authenticator app.
+                </p>
+                <button id="btn-generate-2fa" class="btn btn-primary btn-block" style="margin-bottom: 15px;">Generate Secret Key</button>
+                
+                <div id="2fa-secret-box" class="hidden" style="margin-bottom: 15px;">
+                    <div style="background: var(--bg-dark); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--border); margin-bottom: 15px; font-family: monospace; text-align: center; word-break: break-all;" id="2fa-secret-key">
+                        ABCD EFGH IJKL MNOP
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+                        <div id="2fa-qr-code" style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;">
+                            <img src="" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;" id="2fa-qr-img">
+                        </div>
+                    </div>
+                    
+                    <form id="2fa-enable-form">
+                        <div class="form-group">
+                            <label for="2fa-confirm-code">Enter 6-digit confirmation code</label>
+                            <input type="text" id="2fa-confirm-code" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required style="text-align: center; font-size: 1.2rem; letter-spacing: 0.2rem;">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Enable 2FA</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2FA Disable State (Enabled -> Disable) -->
+            <div id="2fa-setup-disable-view" class="hidden">
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
+                    Two-Factor Authentication is currently <strong style="color: var(--primary);">ENABLED</strong>. Enter a 6-digit authenticator code below to disable it.
+                </p>
+                <form id="2fa-disable-form">
+                    <div class="form-group">
+                        <label for="2fa-disable-code">6-digit Authenticator Code</label>
+                        <input type="text" id="2fa-disable-code" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required style="text-align: center; font-size: 1.2rem; letter-spacing: 0.2rem;">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="background-color: var(--primary); border-color: var(--primary);">Disable 2FA</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-forgot-modal">&times;</span>
+            <h4>Reset Password</h4>
+            
+            <!-- Step 1: Request Reset Link -->
+            <form id="forgot-request-form">
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
+                    Enter your email address and we'll send you a password reset link.
+                </p>
+                <div class="form-group">
+                    <label for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" placeholder="john@example.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Send Reset Link</button>
+            </form>
+
+            <!-- Step 2: Confirm New Password -->
+            <form id="forgot-confirm-form" class="hidden">
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
+                    Enter your new password below.
+                </p>
+                <div class="form-group">
+                    <label for="reset-new-password">New Password</label>
+                    <input type="password" id="reset-new-password" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="reset-confirm-password">Confirm Password</label>
+                    <input type="password" id="reset-confirm-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Set New Password</button>
             </form>
         </div>
     </div>

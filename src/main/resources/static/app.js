@@ -90,10 +90,32 @@ async function apiFetch(url, options = {}) {
 // Start Application
 document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const oauthToken = urlParams.get('oauth_token');
+    const oauthUsername = urlParams.get('username');
+    const resetToken = urlParams.get('reset-token');
+
+    if (oauthToken && oauthUsername) {
+        state.token = oauthToken;
+        state.username = oauthUsername;
+        localStorage.setItem('jwt_token', oauthToken);
+        localStorage.setItem('username', oauthUsername);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    if (resetToken) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        state.activeResetToken = resetToken;
+        document.getElementById('forgot-request-form').classList.add('hidden');
+        document.getElementById('forgot-confirm-form').classList.remove('hidden');
+        document.getElementById('forgot-password-modal').classList.remove('hidden');
+    }
     
     if (state.token && state.username) {
         showLoader(true);
         try {
+            await cacheAllUsers();
             await loadUserProfile();
             showAppView();
         } catch (err) {
@@ -129,6 +151,33 @@ function setupEventListeners() {
     document.getElementById('compose-form').addEventListener('submit', handleComposePost);
     document.getElementById('edit-profile-form').addEventListener('submit', handleUpdateProfile);
 
+    // 2FA login form
+    document.getElementById('2fa-form').addEventListener('submit', handle2faLoginVerify);
+
+    // Forgot Password link & close modal
+    document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('forgot-request-form').classList.remove('hidden');
+        document.getElementById('forgot-confirm-form').classList.add('hidden');
+        document.getElementById('forgot-password-modal').classList.remove('hidden');
+    });
+    document.getElementById('close-forgot-modal').addEventListener('click', () => {
+        document.getElementById('forgot-password-modal').classList.add('hidden');
+    });
+
+    // Password reset forms
+    document.getElementById('forgot-request-form').addEventListener('submit', handleRequestPasswordReset);
+    document.getElementById('forgot-confirm-form').addEventListener('submit', handleConfirmPasswordReset);
+
+    // 2FA configuration modal triggers
+    document.getElementById('profile-2fa-btn').addEventListener('click', open2faSetupModal);
+    document.getElementById('close-2fa-modal').addEventListener('click', () => {
+        document.getElementById('2fa-setup-modal').classList.add('hidden');
+    });
+    document.getElementById('btn-generate-2fa').addEventListener('click', handleGenerate2faKey);
+    document.getElementById('2fa-enable-form').addEventListener('submit', handleEnable2fa);
+    document.getElementById('2fa-disable-form').addEventListener('submit', handleDisable2fa);
+
     // Profile Modals
     document.getElementById('edit-profile-btn').addEventListener('click', () => {
         if (!state.profile) return;
@@ -136,6 +185,9 @@ function setupEventListeners() {
         document.getElementById('edit-phone').value = state.profile.phone || '';
         document.getElementById('edit-location').value = state.profile.location || '';
         document.getElementById('edit-profile-pic').value = state.profile.profilePic || '';
+        document.getElementById('edit-header-pic').value = state.profile.headerPic || '';
+        document.getElementById('edit-bio').value = state.profile.bio || '';
+        document.getElementById('edit-website').value = state.profile.website || '';
         document.getElementById('edit-profile-modal').classList.remove('hidden');
     });
 
@@ -321,17 +373,73 @@ async function handleLogin(e) {
 
         if (!response.ok) throw new Error('Invalid credentials');
 
-        const token = await response.text();
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (err) {
+            data = { status: 'SUCCESS', token: text };
+        }
+
+        if (data.status === '2FA_REQUIRED') {
+            state.tempToken = data.tempToken;
+            state.tempUsername = usernameInput;
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('2fa-form').classList.remove('hidden');
+            document.getElementById('auth-subtitle').textContent = '2FA verification required.';
+            return;
+        }
+
+        const token = data.token;
         state.token = token;
         state.username = usernameInput;
         localStorage.setItem('jwt_token', token);
         localStorage.setItem('username', usernameInput);
 
+        await cacheAllUsers();
         await loadUserProfile();
         showToast('Successfully signed in!');
         await showAppView();
     } catch (err) {
         showToast('Authentication failed: Invalid credentials.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+// 2FA Verification Login Form Action
+async function handle2faLoginVerify(e) {
+    e.preventDefault();
+    const code = document.getElementById('login-2fa-code').value.trim();
+    if (!code || !state.tempToken) return;
+
+    showLoader(true);
+    try {
+        const response = await fetch('/auth/2fa/login-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tempToken: state.tempToken, code: code })
+        });
+
+        if (!response.ok) throw new Error('Invalid code');
+
+        const data = await response.json();
+        state.token = data.token;
+        state.username = state.tempUsername;
+        localStorage.setItem('jwt_token', data.token);
+        localStorage.setItem('username', state.tempUsername);
+
+        state.tempToken = null;
+        state.tempUsername = null;
+        document.getElementById('2fa-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+
+        await cacheAllUsers();
+        await loadUserProfile();
+        showToast('Successfully signed in!');
+        await showAppView();
+    } catch (err) {
+        showToast('Invalid 2FA verification code.', true);
     } finally {
         showLoader(false);
     }
@@ -394,6 +502,18 @@ async function loadUserProfile() {
     }
 }
 
+// Cache all users to resolve timeline names/avatars/verified statuses
+async function cacheAllUsers() {
+    try {
+        const response = await apiFetch(API.user);
+        if (response.ok) {
+            state.allUsers = await response.json();
+        }
+    } catch (err) {
+        console.error('Failed to cache users:', err);
+    }
+}
+
 // Render Sidebar Details
 function renderSidebarProfile() {
     if (!state.profile) return;
@@ -402,6 +522,54 @@ function renderSidebarProfile() {
     document.getElementById('profile-handle').textContent = `@${state.profile.username}`;
     document.getElementById('profile-loc').textContent = state.profile.location || 'Planet Earth';
     document.getElementById('profile-phone').textContent = state.profile.phone || 'Not specified';
+
+    // Header image setting
+    const headerBg = document.getElementById('profile-header-pic');
+    if (state.profile.headerPic) {
+        headerBg.style.backgroundImage = `url('${state.profile.headerPic}')`;
+    } else {
+        headerBg.style.backgroundImage = "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')";
+    }
+
+    // Verified badge
+    const badge = document.getElementById('profile-verified-badge');
+    if (state.profile.verified) {
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+
+    // Bio
+    const bioEl = document.getElementById('profile-bio');
+    if (state.profile.bio) {
+        bioEl.textContent = state.profile.bio;
+        bioEl.classList.remove('hidden');
+    } else {
+        bioEl.classList.add('hidden');
+    }
+
+    // Website
+    const websiteContainer = document.getElementById('profile-website-container');
+    const websiteEl = document.getElementById('profile-website');
+    if (state.profile.website) {
+        websiteEl.textContent = state.profile.website.replace(/https?:\/\//i, '');
+        websiteEl.href = state.profile.website.startsWith('http') ? state.profile.website : 'https://' + state.profile.website;
+        websiteContainer.classList.remove('hidden');
+    } else {
+        websiteContainer.classList.add('hidden');
+    }
+
+    // 2FA button text updates
+    const 2faBtn = document.getElementById('profile-2fa-btn');
+    if (state.profile.twoFactorEnabled) {
+        2faBtn.textContent = '🔒 Disable 2FA';
+        2faBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
+        2faBtn.style.color = 'var(--text-main)';
+    } else {
+        2faBtn.textContent = '🔒 Enable 2FA';
+        2faBtn.style.backgroundColor = 'var(--primary-light)';
+        2faBtn.style.color = 'var(--primary)';
+    }
 }
 
 // Update Profile Form Action
@@ -412,7 +580,10 @@ async function handleUpdateProfile(e) {
         name: document.getElementById('edit-name').value.trim(),
         phone: document.getElementById('edit-phone').value.trim(),
         location: document.getElementById('edit-location').value.trim(),
-        profilePic: document.getElementById('edit-profile-pic').value.trim()
+        profilePic: document.getElementById('edit-profile-pic').value.trim(),
+        headerPic: document.getElementById('edit-header-pic').value.trim(),
+        bio: document.getElementById('edit-bio').value.trim(),
+        website: document.getElementById('edit-website').value.trim()
     };
 
     showLoader(true);
@@ -427,12 +598,170 @@ async function handleUpdateProfile(e) {
         const updated = await response.json();
         state.profile = { ...state.profile, ...updated };
         
+        await cacheAllUsers();
         renderSidebarProfile();
         document.getElementById('header-user-display').textContent = `Hello, ${state.profile.name}`;
         document.getElementById('edit-profile-modal').classList.add('hidden');
         showToast('Profile updated!');
     } catch (err) {
         showToast('Failed to update profile.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+// 2FA Modal workflows
+function open2faSetupModal() {
+    if (!state.profile) return;
+    const isEnabled = state.profile.twoFactorEnabled;
+
+    if (isEnabled) {
+        document.getElementById('2fa-setup-enable-view').classList.add('hidden');
+        document.getElementById('2fa-setup-disable-view').classList.remove('hidden');
+        document.getElementById('2fa-disable-code').value = '';
+    } else {
+        document.getElementById('2fa-setup-disable-view').classList.add('hidden');
+        document.getElementById('2fa-setup-enable-view').classList.remove('hidden');
+        document.getElementById('2fa-secret-box').classList.add('hidden');
+        document.getElementById('2fa-confirm-code').value = '';
+    }
+    document.getElementById('2fa-setup-modal').classList.remove('hidden');
+}
+
+async function handleGenerate2faKey() {
+    showLoader(true);
+    try {
+        const response = await apiFetch('/auth/2fa/setup', { method: 'POST' });
+        if (!response.ok) throw new Error('Setup 2FA failed');
+        const data = await response.json();
+
+        document.getElementById('2fa-secret-key').textContent = data.secret;
+        
+        // Generate actual QR code from public API standard
+        const qrImg = document.getElementById('2fa-qr-img');
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data.otpauthUri)}`;
+        
+        document.getElementById('2fa-secret-box').classList.remove('hidden');
+    } catch (err) {
+        showToast('Failed to generate 2FA setup details.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+async function handleEnable2fa(e) {
+    e.preventDefault();
+    const code = document.getElementById('2fa-confirm-code').value.trim();
+    if (!code) return;
+
+    showLoader(true);
+    try {
+        const response = await apiFetch('/auth/2fa/enable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code })
+        });
+
+        if (!response.ok) throw new Error('Enable failed');
+
+        state.profile.twoFactorEnabled = true;
+        renderSidebarProfile();
+        document.getElementById('2fa-setup-modal').classList.add('hidden');
+        showToast('Two-Factor Authentication enabled successfully!');
+    } catch (err) {
+        showToast('Verification failed. Invalid code.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+async function handleDisable2fa(e) {
+    e.preventDefault();
+    const code = document.getElementById('2fa-disable-code').value.trim();
+    if (!code) return;
+
+    showLoader(true);
+    try {
+        const response = await apiFetch('/auth/2fa/disable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code })
+        });
+
+        if (!response.ok) throw new Error('Disable failed');
+
+        state.profile.twoFactorEnabled = false;
+        renderSidebarProfile();
+        document.getElementById('2fa-setup-modal').classList.add('hidden');
+        showToast('Two-Factor Authentication disabled.');
+    } catch (err) {
+        showToast('Verification failed. Invalid code.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+// Password Reset Form Actions
+async function handleRequestPasswordReset(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) return;
+
+    showLoader(true);
+    try {
+        const response = await fetch('/auth/password-reset/request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText);
+        }
+
+        showToast('Password reset link sent! Check your mailbox.');
+        document.getElementById('forgot-password-modal').classList.add('hidden');
+        document.getElementById('forgot-email').value = '';
+    } catch (err) {
+        showToast(err.message || 'Failed to send reset link.', true);
+    } finally {
+        showLoader(false);
+    }
+}
+
+async function handleConfirmPasswordReset(e) {
+    e.preventDefault();
+    const password = document.getElementById('reset-new-password').value;
+    const confirm = document.getElementById('reset-confirm-password').value;
+
+    if (password !== confirm) {
+        showToast('Passwords do not match.', true);
+        return;
+    }
+
+    if (!state.activeResetToken) {
+        showToast('Invalid session token.', true);
+        return;
+    }
+
+    showLoader(true);
+    try {
+        const response = await fetch('/auth/password-reset/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: state.activeResetToken, password: password })
+        });
+
+        if (!response.ok) throw new Error('Failed to reset');
+
+        showToast('Password updated! You can now login.');
+        document.getElementById('forgot-password-modal').classList.add('hidden');
+        document.getElementById('reset-new-password').value = '';
+        document.getElementById('reset-confirm-password').value = '';
+        state.activeResetToken = null;
+    } catch (err) {
+        showToast('Reset failed: Invalid or expired token.', true);
     } finally {
         showLoader(false);
     }
@@ -486,6 +815,10 @@ function renderTimeline(posts, containerId = 'feed-timeline') {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
+        const author = (state.allUsers || []).find(u => u.username.toLowerCase() === post.username.toLowerCase());
+        const avatar = author ? (author.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80') : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+        const isVerified = author ? author.verified : false;
+
         const postCard = document.createElement('article');
         postCard.className = 'card post-card';
         postCard.id = `${containerId}-post-${post.id}`;
@@ -502,9 +835,12 @@ function renderTimeline(posts, containerId = 'feed-timeline') {
         postCard.innerHTML = `
             <div class="post-header">
                 <div class="post-author-info">
-                    <img class="post-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                    <img class="post-avatar" src="${avatar}" alt="Avatar">
                     <div>
-                        <div class="author-name">${post.username}</div>
+                        <div class="author-name" style="display: flex; align-items: center; gap: 4px; font-weight: 600;">
+                            ${post.username}
+                            ${isVerified ? '<span class="verified-badge" style="font-size: 0.75rem;">💙</span>' : ''}
+                        </div>
                         <div class="post-timestamp">${dateStr}</div>
                     </div>
                 </div>
@@ -669,15 +1005,12 @@ async function handleAddComment(e, postId, containerId = 'feed-timeline') {
 // Suggested Users
 async function loadSuggestedUsers() {
     const list = document.getElementById('suggested-users-list');
-    list.innerHTML = 'Loading suggested users...';
+    list.innerHTML = '';
 
     try {
-        const response = await apiFetch(API.user);
-        if (!response.ok) throw new Error('Failed to load suggested users');
-        const users = await response.json();
-        
+        const users = state.allUsers || [];
         const filtered = users.filter(u => u.username.toLowerCase() !== state.username.toLowerCase());
-        list.innerHTML = '';
+        
         if (filtered.length === 0) {
             list.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-light); text-align: center;">No suggested users.</div>';
             return;
@@ -689,8 +1022,11 @@ async function loadSuggestedUsers() {
             div.innerHTML = `
                 <div class="user-item-info">
                     <img class="user-item-avatar" src="${user.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}" alt="Avatar">
-                    <div class="user-item-details">
-                        <span class="user-item-name">${user.name}</span>
+                    <div class="user-item-details" style="display: flex; flex-direction: column;">
+                        <span class="user-item-name" style="display: flex; align-items: center; gap: 4px;">
+                            ${user.name}
+                            ${user.verified ? '<span class="verified-badge" style="font-size: 0.75rem;">💙</span>' : ''}
+                        </span>
                         <span class="user-item-handle">@${user.username}</span>
                     </div>
                 </div>

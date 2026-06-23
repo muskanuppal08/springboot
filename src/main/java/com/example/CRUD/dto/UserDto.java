@@ -16,4 +16,9 @@ public class UserDto {
     private String name ;
     private String phone ;
     private String profilePic ;
+    private String bio;
+    private String website;
+    private String headerPic;
+    private boolean verified;
+    private boolean twoFactorEnabled;
 }

@@ -1276,3 +1276,105 @@ input:checked + .snap-slider {
         display: none;
     }
 }
+
+/* ===============================
+   OAUTH2 & 2FA FRONTEND UPGRADES
+   =============================== */
+
+.oauth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin: 15px 0;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.oauth-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.oauth-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.oauth-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.btn-oauth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.btn-google {
+    background: #ffffff;
+    color: #3c4043;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+    border-color: #dadce0;
+}
+
+.btn-github {
+    background: #24292e;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-github:hover {
+    background: #1b1f23;
+}
+
+/* Verified Blue Tick */
+.verified-badge {
+    color: #3b82f6;
+    font-size: 0.95rem;
+    cursor: help;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Profile header dynamic pic override */
+.profile-header-bg {
+    transition: background-image 0.4s ease;
+}
+
+/* Custom Text area */
+textarea#edit-bio {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    outline: none;
+    resize: none;
+    transition: all 0.2s ease;
+}
+
+textarea#edit-bio:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+}
