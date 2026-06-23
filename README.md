@@ -22,6 +22,26 @@ A premium, production-grade Spring Boot 4.x RESTful API backend for a Social Med
 - **Global search:** Endpoint for cross-entity searching of users and posts with pagination support.
 - **Health Check:** Subpackaged ping routes for API diagnostics.
 
+### 4. Interactive SPA Frontend
+- **Single Page Application:** Fast, dynamic client interface served directly from the Spring Boot server (`http://localhost:8080/`).
+- **Responsive Layout:** Beautiful fluid design (Flexbox/Grid/CSS Media Queries) supporting mobile, tablet, and desktop viewports.
+- **Aesthetic Styling:** Modern design styled with soft pastels, glassmorphism overlays (`backdrop-filter`), smooth hover transitions, and user experience micro-animations.
+- **Client Side State:** Stateful local session storage for JWT token authentication, enabling smooth profile updates, interactive searches, real-time comment expansion, and dynamic following.
+
+---
+
+## 💻 Frontend Interface
+
+The application features an interactive, responsive frontend. Once the Spring Boot application is running locally:
+1. Open your browser and navigate to `http://localhost:8080/`.
+2. **Register/Login:** Unauthenticated users are served the login/register screen. Passwords are encrypted on the backend using BCrypt.
+3. **Workspace Features:**
+   - **Main Timeline:** Share your vibes (text and optional photo/video attachment) and view chronological posts from users you follow.
+   - **Like/Comment Drawer:** Expand comments inline, add replies dynamically, and toggle likes.
+   - **Profile Sidebar:** Track profile details, toggle account visibility (Public/Private), and edit credentials.
+   - **Search Panel:** Search users and vibes in real-time.
+   - **Networking:** Manage follower and following lists directly.
+
 ---
 
 ## 🛠️ Technology Stack

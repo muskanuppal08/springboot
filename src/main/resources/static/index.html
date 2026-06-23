@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeNet - Share Your Vibes</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Preloader -->
+    <div id="preloader" class="preloader-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <span class="logo-text">VibeNet</span>
+                <p id="auth-subtitle">Welcome back! Please login to your account.</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="e.g. johndoe" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <div class="auth-footer">
+                    Don't have an account? <a href="#" id="go-to-register">Register here</a>
+                </div>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" class="auth-form hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <input type="text" id="reg-username" placeholder="johndoe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" placeholder="john@example.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-phone">Phone Number</label>
+                        <input type="tel" id="reg-phone" placeholder="+1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-profile-pic">Profile Picture Link</label>
+                        <input type="url" id="reg-profile-pic" placeholder="https://image-url.com">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                <div class="auth-footer">
+                    Already have an account? <a href="#" id="go-to-login">Sign in here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP VIEW (Hidden until auth) -->
+    <div id="app-section" class="app-container hidden">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <span class="logo-text header-logo">VibeNet</span>
+                
+                <div class="search-bar-container">
+                    <input type="text" id="global-search-input" placeholder="Search vibes or users...">
+                    <button id="global-search-btn" class="btn btn-icon">🔍</button>
+                </div>
+
+                <div class="header-actions">
+                    <span id="header-user-display" class="user-pill">Hello, User</span>
+                    <button id="logout-btn" class="btn btn-secondary btn-sm">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Unverified Banner -->
+        <div id="unverified-banner" class="unverified-banner hidden">
+            ⚠️ Your email is unverified. Please check your email to verify your account and unlock publishing!
+        </div>
+
+        <div class="main-layout">
+            
+            <!-- Left Sidebar: Profile Details -->
+            <aside class="sidebar-left">
+                <div class="card profile-card">
+                    <div class="profile-header-bg"></div>
+                    <div class="profile-avatar-container">
+                        <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="profile-fullname">John Doe</h3>
+                        <p id="profile-handle">@johndoe</p>
+                        
+                        <div class="profile-details-list">
+                            <div class="detail-item">
+                                <span class="detail-icon">📍</span>
+                                <span id="profile-loc">Planet Earth</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📞</span>
+                                <span id="profile-phone">Not specified</span>
+                            </div>
+                        </div>
+
+                        <!-- Visibility Switch -->
+                        <div class="visibility-toggle-container">
+                            <span class="toggle-label">Public Profile</span>
+                            <label class="switch">
+                                <input type="checkbox" id="profile-visibility-toggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <button id="edit-profile-btn" class="btn btn-outline btn-block btn-sm">Edit Details</button>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Modal -->
+                <div id="edit-profile-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <span class="close-modal">&times;</span>
+                        <h4>Update Profile Details</h4>
+                        <form id="edit-profile-form">
+                            <div class="form-group">
+                                <label for="edit-name">Full Name</label>
+                                <input type="text" id="edit-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-phone">Phone Number</label>
+                                <input type="text" id="edit-phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-location">Location</label>
+                                <input type="text" id="edit-location" placeholder="e.g. New York, USA">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-profile-pic">Profile Picture URL</label>
+                                <input type="url" id="edit-profile-pic">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Timeline: Compose and Posts -->
+            <main class="timeline-center">
+                
+                <!-- Search Results Section (Shown when search is active) -->
+                <section id="search-results-section" class="search-results-box hidden">
+                    <div class="section-header">
+                        <h4>Search Results</h4>
+                        <button id="clear-search-btn" class="btn btn-text">Clear Search</button>
+                    </div>
+                    <div class="search-tabs">
+                        <button id="tab-posts" class="tab-btn active">Posts</button>
+                        <button id="tab-users" class="tab-btn">People</button>
+                    </div>
+                    <div id="search-posts-output" class="search-output"></div>
+                    <div id="search-users-output" class="search-output hidden"></div>
+                </section>
+
+                <!-- Composer -->
+                <div class="card compose-card" id="composer-box">
+                    <form id="compose-form">
+                        <textarea id="post-content" placeholder="Share your vibe today..." required></textarea>
+                        <div class="compose-footer">
+                            <div class="media-upload-wrapper">
+                                <label for="post-media-file" class="file-upload-label">
+                                    🖼️ <span id="file-chosen-name">Add Photo/Video</span>
+                                </label>
+                                <input type="file" id="post-media-file" accept="image/*,video/*" hidden>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Share</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Feed Output -->
+                <div id="feed-timeline">
+                    <!-- Posts dynamically inserted here -->
+                </div>
+
+                <!-- Pagination triggers -->
+                <div class="pagination-footer">
+                    <button id="load-more-btn" class="btn btn-outline">Load Older Vibes</button>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Social Graph & Networking -->
+            <aside class="sidebar-right">
+                
+                <!-- Social Tabs -->
+                <div class="card social-card">
+                    <div class="social-tabs-header">
+                        <button id="tab-following" class="social-tab-btn active">Following</button>
+                        <button id="tab-followers" class="social-tab-btn">Followers</button>
+                    </div>
+                    <div class="social-list-content">
+                        <!-- Following List -->
+                        <div id="following-list" class="social-list">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- Followers List -->
+                        <div id="followers-list" class="social-list hidden">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggested Users Box -->
+                <div class="card suggested-card">
+                    <div class="card-header">
+                        <h4>Explore People</h4>
+                    </div>
+                    <div id="suggested-users-list" class="suggested-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- JS Source -->
+    <script src="app.js"></script>
+</body>
+</html>
