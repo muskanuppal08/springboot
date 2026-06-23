@@ -39,4 +39,11 @@ public class FeedService {
         Page<Post> posts  = postRepository.findFeed(user.getId(), pageable);
         return posts.map(this::toDto) ;
     }
+
+    public Page<PostResponseDto> getExploreFeed(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        User user = userRepository.findByUsername(username);
+        Page<Post> posts = postRepository.findExploreFeed(user.getId(), pageable);
+        return posts.map(this::toDto);
+    }
 }

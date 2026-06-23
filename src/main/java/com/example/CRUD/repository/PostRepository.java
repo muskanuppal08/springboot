@@ -26,6 +26,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     """)
     Page<Post> findFeed(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("""
+        SELECT p FROM Post p
+        WHERE p.user.visible = true
+        AND p.user.id <> :userId
+        ORDER BY (SIZE(p.likes) + SIZE(p.comments)) DESC, p.createdAt DESC
+    """)
+    Page<Post> findExploreFeed(@Param("userId") Long userId, Pageable pageable);
 
     Page<Post> findByContentContainsIgnoreCase(String content , Pageable pageable);
 

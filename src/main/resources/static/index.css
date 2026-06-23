@@ -1,6 +1,6 @@
-/* Base Variables */
+/* VibeNet Global Styling & Design Tokens */
 :root {
-    --bg-primary: linear-gradient(135deg, hsl(230, 40%, 96%) 0%, hsl(280, 40%, 95%) 50%, hsl(330, 40%, 96%) 100%);
+    --bg-primary: linear-gradient(135deg, hsl(230, 40%, 96%) 0%, hsl(280, 45%, 95%) 50%, hsl(330, 40%, 96%) 100%);
     --bg-card: rgba(255, 255, 255, 0.72);
     --border-color: rgba(225, 228, 235, 0.5);
     --border-glass: rgba(255, 255, 255, 0.6);
@@ -12,13 +12,16 @@
     --text-main: hsl(225, 25%, 20%);
     --text-muted: hsl(225, 15%, 50%);
     --text-light: hsl(225, 10%, 65%);
-    --shadow-main: 0 8px 30px rgba(0, 0, 0, 0.03);
     --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
     --radius-lg: 20px;
     --radius-md: 14px;
     --radius-sm: 8px;
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
+    
+    /* Snapchat / Yellow Branding option */
+    --snapchat-yellow: hsl(50, 95%, 55%);
+    --snapchat-purple: hsl(265, 80%, 60%);
 }
 
 /* Global Reset */
@@ -37,12 +40,11 @@ body {
     line-height: 1.5;
 }
 
-/* Layout Utilities */
 .hidden {
     display: none !important;
 }
 
-/* Cards & Containers (Glassmorphism) */
+/* Cards & Glassmorphism */
 .card {
     background: var(--bg-card);
     backdrop-filter: blur(16px);
@@ -58,98 +60,6 @@ body {
 .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08);
-}
-
-/* Input Fields */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-input[type="url"],
-textarea {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(200, 205, 218, 0.6);
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    color: var(--text-main);
-    transition: all 0.25s ease;
-    outline: none;
-}
-
-input:focus,
-textarea:focus {
-    background: #ffffff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-light);
-}
-
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 10px 24px;
-    border-radius: var(--radius-md);
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: #ffffff;
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-    transform: scale(1.02);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-}
-
-.btn-secondary:hover {
-    background: #ffffff;
-    border-color: var(--text-muted);
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-}
-
-.btn-outline:hover {
-    background: var(--primary-light);
-}
-
-.btn-icon {
-    background: transparent;
-    padding: 8px;
-    border-radius: 50%;
-}
-
-.btn-icon:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.btn-block {
-    width: 100%;
-}
-
-.btn-sm {
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    border-radius: var(--radius-sm);
 }
 
 /* Auth Screens */
@@ -232,7 +142,7 @@ textarea:focus {
     font-weight: 500;
 }
 
-/* App Container & Layout */
+/* App Header & Layout */
 .app-container {
     display: flex;
     flex-direction: column;
@@ -282,13 +192,12 @@ textarea:focus {
 }
 
 .search-bar-container input {
+    width: 100%;
     background: transparent;
     border: none;
     padding: 8px 16px;
-}
-
-.search-bar-container input:focus {
-    box-shadow: none;
+    outline: none;
+    font-family: var(--font-sans);
 }
 
 .header-actions {
@@ -306,17 +215,6 @@ textarea:focus {
     border-radius: 20px;
 }
 
-/* Unverified Banner */
-.unverified-banner {
-    background: hsl(35, 100%, 94%);
-    border-bottom: 1px solid hsl(35, 100%, 85%);
-    color: hsl(35, 90%, 40%);
-    text-align: center;
-    padding: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
 /* Main Layout Grid */
 .main-layout {
     display: grid;
@@ -329,7 +227,40 @@ textarea:focus {
     flex-grow: 1;
 }
 
-/* Sidebar Profile */
+/* Navigation Panel Card */
+.nav-card {
+    padding: 16px;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-main);
+    transform: translateX(4px);
+}
+
+.nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Profile sidebar elements */
 .profile-card {
     padding: 0;
     overflow: hidden;
@@ -407,7 +338,7 @@ textarea:focus {
     color: var(--text-muted);
 }
 
-/* Toggle Switch Style */
+/* Switch */
 .switch {
     position: relative;
     display: inline-block;
@@ -459,52 +390,523 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-/* Composer Card */
-.compose-card {
-    padding: 20px;
+/* Explore Grid Section (Instagram Style) */
+.explore-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 16px;
 }
 
-.compose-card textarea {
-    border: none;
-    background: transparent;
-    resize: none;
-    font-size: 1.05rem;
-    min-height: 80px;
-    padding: 8px 0;
-}
-
-.compose-card textarea:focus {
-    box-shadow: none;
-}
-
-.compose-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
-    padding-top: 14px;
-    margin-top: 10px;
-}
-
-.file-upload-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+.explore-grid-item {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    position: relative;
+    border-radius: var(--radius-md);
     cursor: pointer;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+}
+
+.explore-grid-item img,
+.explore-grid-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.explore-grid-item:hover img,
+.explore-grid-item:hover video {
+    transform: scale(1.05);
+}
+
+.explore-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: opacity 0.3s ease;
+}
+
+.explore-grid-item:hover .explore-grid-overlay {
+    opacity: 1;
+}
+
+.grid-stat {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+}
+
+.grid-header {
+    margin-bottom: 20px;
+}
+
+.grid-header h4 {
+    font-size: 1.25rem;
+    font-family: var(--font-serif);
+}
+
+.grid-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Stories Bar (Snapchat & Instagram hybrid) */
+.stories-wrapper {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.stories-list {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow-x: auto;
+    flex-grow: 1;
+    scrollbar-width: none; /* Hide scrollbar for clean UI */
+}
+
+.stories-list::-webkit-scrollbar {
+    display: none;
+}
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 68px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.story-item span {
+    margin-top: 6px;
+    color: var(--text-main);
+    width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.story-item:hover {
+    transform: scale(1.05);
+}
+
+.story-avatar-wrapper {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, var(--snapchat-yellow), var(--primary), var(--secondary));
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.story-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+}
+
+/* Add Story Plus badge */
+.story-avatar-wrapper.add {
+    background: var(--border-color);
+}
+
+.story-avatar-wrapper.add img {
+    border-color: #ffffff;
+}
+
+.add-icon {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    background: var(--primary);
+    color: #ffffff;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #ffffff;
+}
+
+/* Snapchat Story Player overlay */
+.story-player-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.story-player-content {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    max-height: 850px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #111111;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.story-player-header {
+    position: absolute;
+    top: 24px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 520;
+    color: #ffffff;
+}
+
+#story-player-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid #ffffff;
+    object-fit: cover;
+}
+
+#story-player-username {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.story-time {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-left: 8px;
+}
+
+.story-close-btn {
+    position: absolute;
+    top: 24px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 2.2rem;
+    cursor: pointer;
+    z-index: 530;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.story-player-body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000000;
+}
+
+.story-media {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Story Player progress indicators at top */
+.story-progress-bar-container {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+    z-index: 520;
+}
+
+.story-progress-bar-slot {
+    height: 2px;
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.story-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #ffffff;
+    transition: width linear;
+}
+
+/* Snapchat Chat Sidebar Workspace */
+.chat-workspace-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.chat-sidebar-layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-thread-list-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-threads-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 480px;
+}
+
+.chat-thread-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+    transition: background 0.2s ease;
+}
+
+.chat-thread-item:hover {
+    background: rgba(0,0,0,0.02);
+}
+
+.chat-thread-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.streak-pill {
+    background: var(--snapchat-yellow);
+    color: hsl(45, 95%, 20%);
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+/* Snapchat Direct Message Modal Window */
+.chat-modal-content {
+    max-width: 580px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chat-window-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-messages-container {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(245,247,250,0.6) 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.chat-bubble.incoming {
+    align-self: flex-start;
+    background: #ffffff;
+    color: var(--text-main);
+    border-top-left-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.chat-bubble.outgoing {
+    align-self: flex-end;
+    background: var(--primary);
+    color: #ffffff;
+    border-top-right-radius: 4px;
+}
+
+/* Snap Lock / Disappearing Snap bubble */
+.chat-bubble.snap-lock {
+    background: var(--snapchat-purple);
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    align-self: flex-start;
+    border-top-left-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.chat-bubble.snap-lock:hover {
+    transform: scale(1.02);
+}
+
+.chat-composer-form {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    background: #ffffff;
+}
+
+.chat-composer-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-composer-row textarea {
+    min-height: 44px;
+    max-height: 100px;
+    padding: 10px 14px;
+    resize: none;
+}
+
+.chat-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Snapchat style "Snap" switch toggle */
+.snap-switch {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 30px;
+}
+
+.snap-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.snap-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: .3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-muted);
+}
+
+input:checked + .snap-slider {
+    background-color: var(--snapchat-purple);
+    color: #ffffff;
+}
+
+.snap-slider.round {
+    border-radius: 30px;
+}
+
+.chat-file-upload-btn {
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 4px 8px;
     border-radius: var(--radius-sm);
     transition: background 0.2s ease;
 }
 
-.file-upload-label:hover {
-    background: rgba(0,0,0,0.03);
+.chat-file-upload-btn:hover {
+    background: rgba(0,0,0,0.05);
 }
 
-/* Feed Timeline & Posts */
-.post-card {
-    animation: fadeInUp 0.5s ease-out;
+.chat-file-preview {
+    font-size: 0.75rem;
+    color: var(--primary);
+    margin-top: 4px;
+    padding-left: 4px;
+}
+
+/* Explore detail view */
+.explore-modal-content {
+    max-width: 580px;
+}
+
+/* Rest of basic styling from original CSS */
+.form-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.unverified-banner {
+    background: hsl(35, 100%, 94%);
+    border-bottom: 1px solid hsl(35, 100%, 85%);
+    color: hsl(35, 90%, 40%);
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .post-header {
@@ -594,11 +996,6 @@ input:checked + .slider:before {
     font-weight: 500;
 }
 
-.action-btn.liked:hover {
-    background: var(--primary-light);
-}
-
-/* Comments Section */
 .comments-section {
     display: flex;
     flex-direction: column;
@@ -611,16 +1008,6 @@ input:checked + .slider:before {
     gap: 8px;
     max-height: 250px;
     overflow-y: auto;
-    padding-right: 4px;
-}
-
-.comments-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.comments-list::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
-    border-radius: 4px;
 }
 
 .comment-item {
@@ -633,18 +1020,12 @@ input:checked + .slider:before {
 
 .comment-author {
     font-weight: 600;
-    color: var(--text-main);
     margin-right: 6px;
-}
-
-.comment-text {
-    color: var(--text-main);
 }
 
 .comment-composer {
     display: flex;
     gap: 8px;
-    margin-top: 4px;
 }
 
 .comment-composer input {
@@ -653,10 +1034,10 @@ input:checked + .slider:before {
     font-size: 0.85rem;
 }
 
-/* Right Sidebar: Social Lists */
-.social-card {
-    padding: 0;
-    overflow: hidden;
+.suggested-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .social-tabs-header {
@@ -671,14 +1052,7 @@ input:checked + .slider:before {
     padding: 14px;
     font-family: var(--font-sans);
     font-weight: 500;
-    font-size: 0.9rem;
-    color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.social-tab-btn:hover {
-    color: var(--text-main);
 }
 
 .social-tab-btn.active {
@@ -692,25 +1066,12 @@ input:checked + .slider:before {
     overflow-y: auto;
 }
 
-.social-list-content::-webkit-scrollbar {
-    width: 4px;
-}
-
-.social-list-content::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
-    border-radius: 4px;
-}
-
 .user-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 8px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-}
-
-.user-item:last-child {
-    border-bottom: none;
 }
 
 .user-item-info {
@@ -741,34 +1102,9 @@ input:checked + .slider:before {
     color: var(--text-light);
 }
 
-/* Explore Panel */
-.suggested-card {
-    padding: 20px;
-}
-
-.card-header {
-    margin-bottom: 16px;
-}
-
-.card-header h4 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.suggested-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* Search Box Layout */
 .search-results-box {
     margin-bottom: 24px;
-    border: 1px solid var(--primary);
-    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid var(--primary);
 }
 
 .section-header {
@@ -798,7 +1134,6 @@ input:checked + .slider:before {
     border-radius: 20px;
     font-size: 0.85rem;
     cursor: pointer;
-    font-family: var(--font-sans);
 }
 
 .tab-btn.active {
@@ -807,7 +1142,7 @@ input:checked + .slider:before {
     border-color: var(--primary);
 }
 
-/* Modals */
+/* Modal styles */
 .modal {
     position: fixed;
     top: 0;
@@ -845,18 +1180,6 @@ input:checked + .slider:before {
     color: var(--text-main);
 }
 
-.modal-content h4 {
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-/* Toast Notifications */
 .toast {
     position: fixed;
     bottom: 24px;
@@ -875,7 +1198,6 @@ input:checked + .slider:before {
     background: hsl(354, 70%, 54%);
 }
 
-/* Preloader spinner */
 .preloader-overlay {
     position: fixed;
     top: 0;
@@ -899,14 +1221,12 @@ input:checked + .slider:before {
     animation: spin 0.8s linear infinite;
 }
 
-/* Pagination */
 .pagination-footer {
     display: flex;
     justify-content: center;
     margin: 20px 0 40px 0;
 }
 
-/* Animations */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -934,7 +1254,7 @@ input:checked + .slider:before {
     100% { transform: rotate(360deg); }
 }
 
-/* RESPONSIVE DESIGN (Media Queries) */
+/* Responsive sidebars collapse */
 @media (max-width: 1100px) {
     .main-layout {
         grid-template-columns: 240px 1fr;
@@ -953,9 +1273,6 @@ input:checked + .slider:before {
         display: none;
     }
     .search-bar-container {
-        display: none; /* Hide global search in small headers, keep layout clean */
-    }
-    .header-logo {
-        font-size: 1.5rem;
+        display: none;
     }
 }

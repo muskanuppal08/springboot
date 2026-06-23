@@ -28,6 +28,12 @@ A premium, production-grade Spring Boot 4.x RESTful API backend for a Social Med
 - **Aesthetic Styling:** Modern design styled with soft pastels, glassmorphism overlays (`backdrop-filter`), smooth hover transitions, and user experience micro-animations.
 - **Client Side State:** Stateful local session storage for JWT token authentication, enabling smooth profile updates, interactive searches, real-time comment expansion, and dynamic following.
 
+### 5. Snapchat & Instagram Hybrid Features
+- **Temporal Stories (24h expiry):** Post images/videos as stories that automatically disappear after 24 hours (supported by a background Spring scheduler checking hourly).
+- **Interactive Story Viewer:** Watch stories in a full-screen player modal complete with segmented visual progress timelines.
+- **Direct Snaps & Streaks:** Engage in real-time private messages. Support "View Once" snaps that disappear from the chat feed once clicked, and daily streaks 🔥 that increment when users message each other daily.
+- **Explore Grid (Instagram style):** Browse trending public vibes sorted by likes and comments popularity in a 3-column responsive photo grid.
+
 ---
 
 ## 💻 Frontend Interface
@@ -35,12 +41,11 @@ A premium, production-grade Spring Boot 4.x RESTful API backend for a Social Med
 The application features an interactive, responsive frontend. Once the Spring Boot application is running locally:
 1. Open your browser and navigate to `http://localhost:8080/`.
 2. **Register/Login:** Unauthenticated users are served the login/register screen. Passwords are encrypted on the backend using BCrypt.
-3. **Workspace Features:**
-   - **Main Timeline:** Share your vibes (text and optional photo/video attachment) and view chronological posts from users you follow.
-   - **Like/Comment Drawer:** Expand comments inline, add replies dynamically, and toggle likes.
-   - **Profile Sidebar:** Track profile details, toggle account visibility (Public/Private), and edit credentials.
-   - **Search Panel:** Search users and vibes in real-time.
-   - **Networking:** Manage follower and following lists directly.
+3. **Workspace Navigation (Instagram / Snapchat Blend):**
+   - **🏠 Home Feed:** View chronological posts, post comments, like vibes, and view **Active Stories** at the top. Click your avatar to post a new 24h story!
+   - **🧭 Explore Grid:** Search public trending media arranged in a 3-column Instagram photo grid. Click any image to view details, like, and comment in a modal drawer.
+   - **💬 Chat Messages:** Chat with friends. Toggle the **⚡ Snap** button to send disappearing, view-once photos/videos, and maintain your **Daily Streak 🔥** count.
+   - **Profile Sidebar:** Track profile stats, toggle account visibility (Public/Private), and edit credentials.
 
 ---
 

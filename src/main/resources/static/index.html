@@ -44,7 +44,7 @@
                 </div>
             </form>
 
-            <!-- Register Form (Hidden by default) -->
+            <!-- Register Form -->
             <form id="register-form" class="auth-form hidden">
                 <div class="form-row">
                     <div class="form-group">
@@ -84,13 +84,13 @@
         </div>
     </div>
 
-    <!-- MAIN APP VIEW (Hidden until auth) -->
+    <!-- MAIN APP VIEW -->
     <div id="app-section" class="app-container hidden">
         
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <span class="logo-text header-logo">VibeNet</span>
+                <span class="logo-text header-logo" id="header-logo-btn" style="cursor:pointer;">VibeNet</span>
                 
                 <div class="search-bar-container">
                     <input type="text" id="global-search-input" placeholder="Search vibes or users...">
@@ -106,12 +106,12 @@
 
         <!-- Unverified Banner -->
         <div id="unverified-banner" class="unverified-banner hidden">
-            ⚠️ Your email is unverified. Please check your email to verify your account and unlock publishing!
+            ⚠️ Your email is unverified. Check email to verify account and unlock posting!
         </div>
 
         <div class="main-layout">
             
-            <!-- Left Sidebar: Profile Details -->
+            <!-- Left Sidebar -->
             <aside class="sidebar-left">
                 <div class="card profile-card">
                     <div class="profile-header-bg"></div>
@@ -146,39 +146,36 @@
                     </div>
                 </div>
 
-                <!-- Edit Profile Modal -->
-                <div id="edit-profile-modal" class="modal hidden">
-                    <div class="modal-content">
-                        <span class="close-modal">&times;</span>
-                        <h4>Update Profile Details</h4>
-                        <form id="edit-profile-form">
-                            <div class="form-group">
-                                <label for="edit-name">Full Name</label>
-                                <input type="text" id="edit-name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-phone">Phone Number</label>
-                                <input type="text" id="edit-phone">
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-location">Location</label>
-                                <input type="text" id="edit-location" placeholder="e.g. New York, USA">
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-profile-pic">Profile Picture URL</label>
-                                <input type="url" id="edit-profile-pic">
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
-                        </form>
-                    </div>
+                <!-- App Navigation Controls -->
+                <div class="card nav-card">
+                    <ul class="nav-list">
+                        <li class="nav-item active" id="nav-home-btn">🏠 Home Feed</li>
+                        <li class="nav-item" id="nav-explore-btn">🧭 Explore Grid</li>
+                        <li class="nav-item" id="nav-chats-btn">💬 Chat Messages</li>
+                    </ul>
                 </div>
             </aside>
 
-            <!-- Center Timeline: Compose and Posts -->
+            <!-- Center Timeline -->
             <main class="timeline-center">
                 
-                <!-- Search Results Section (Shown when search is active) -->
-                <section id="search-results-section" class="search-results-box hidden">
+                <!-- Stories Tray (Snapchat/Instagram hybrid) -->
+                <div class="stories-wrapper card" id="stories-tray-box">
+                    <div class="story-item add-story-btn" id="self-story-btn">
+                        <div class="story-avatar-wrapper add">
+                            <img id="self-story-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Me">
+                            <span class="add-icon">+</span>
+                        </div>
+                        <span>Add Story</span>
+                        <input type="file" id="story-file-picker" accept="image/*,video/*" hidden>
+                    </div>
+                    <div id="stories-container" class="stories-list">
+                        <!-- Followed stories dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Search Results Section -->
+                <section id="search-results-section" class="search-results-box card hidden">
                     <div class="section-header">
                         <h4>Search Results</h4>
                         <button id="clear-search-btn" class="btn btn-text">Clear Search</button>
@@ -191,34 +188,61 @@
                     <div id="search-users-output" class="search-output hidden"></div>
                 </section>
 
-                <!-- Composer -->
-                <div class="card compose-card" id="composer-box">
-                    <form id="compose-form">
-                        <textarea id="post-content" placeholder="Share your vibe today..." required></textarea>
-                        <div class="compose-footer">
-                            <div class="media-upload-wrapper">
-                                <label for="post-media-file" class="file-upload-label">
-                                    🖼️ <span id="file-chosen-name">Add Photo/Video</span>
-                                </label>
-                                <input type="file" id="post-media-file" accept="image/*,video/*" hidden>
+                <!-- Core Workspaces -->
+                
+                <!-- Workspace 1: Main Feed & Composer -->
+                <div id="workspace-home">
+                    <!-- Composer -->
+                    <div class="card compose-card" id="composer-box">
+                        <form id="compose-form">
+                            <textarea id="post-content" placeholder="Share your vibe today..." required></textarea>
+                            <div class="compose-footer">
+                                <div class="media-upload-wrapper">
+                                    <label for="post-media-file" class="file-upload-label">
+                                        🖼️ <span id="file-chosen-name">Add Photo/Video</span>
+                                    </label>
+                                    <input type="file" id="post-media-file" accept="image/*,video/*" hidden>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Share</button>
                             </div>
-                            <button type="submit" class="btn btn-primary">Share</button>
+                        </form>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div id="feed-timeline"></div>
+                    
+                    <div class="pagination-footer">
+                        <button id="load-more-btn" class="btn btn-outline">Load Older Vibes</button>
+                    </div>
+                </div>
+
+                <!-- Workspace 2: Explore Photo Grid (Instagram Grid style) -->
+                <div id="workspace-explore" class="hidden">
+                    <div class="grid-header">
+                        <h4>Explore Popular Vibes</h4>
+                        <p>Trending stories and snapshots across VibeNet</p>
+                    </div>
+                    <div id="explore-grid" class="explore-photo-grid">
+                        <!-- 3 column Instagram photo layout dynamically loaded -->
+                    </div>
+                </div>
+
+                <!-- Workspace 3: Direct Messaging and Snap Streaks (Snapchat style) -->
+                <div id="workspace-chats" class="hidden">
+                    <div class="card chat-workspace-card">
+                        <div class="chat-sidebar-layout">
+                            <div class="chat-thread-list-header">
+                                <h4>My Active Streaks 🔥</h4>
+                            </div>
+                            <div id="chat-thread-list" class="chat-threads-container">
+                                <!-- Users list with daily streaks count -->
+                            </div>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Feed Output -->
-                <div id="feed-timeline">
-                    <!-- Posts dynamically inserted here -->
-                </div>
-
-                <!-- Pagination triggers -->
-                <div class="pagination-footer">
-                    <button id="load-more-btn" class="btn btn-outline">Load Older Vibes</button>
+                    </div>
                 </div>
             </main>
 
-            <!-- Right Sidebar: Social Graph & Networking -->
+            <!-- Right Sidebar -->
             <aside class="sidebar-right">
                 
                 <!-- Social Tabs -->
@@ -228,15 +252,8 @@
                         <button id="tab-followers" class="social-tab-btn">Followers</button>
                     </div>
                     <div class="social-list-content">
-                        <!-- Following List -->
-                        <div id="following-list" class="social-list">
-                            <!-- Populated dynamically -->
-                        </div>
-
-                        <!-- Followers List -->
-                        <div id="followers-list" class="social-list hidden">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div id="following-list" class="social-list"></div>
+                        <div id="followers-list" class="social-list hidden"></div>
                     </div>
                 </div>
 
@@ -245,12 +262,110 @@
                     <div class="card-header">
                         <h4>Explore People</h4>
                     </div>
-                    <div id="suggested-users-list" class="suggested-list">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="suggested-users-list" class="suggested-list"></div>
                 </div>
             </aside>
 
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h4>Update Profile Details</h4>
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label for="edit-name">Full Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-phone">Phone Number</label>
+                    <input type="text" id="edit-phone">
+                </div>
+                <div class="form-group">
+                    <label for="edit-location">Location</label>
+                    <input type="text" id="edit-location" placeholder="e.g. London, UK">
+                </div>
+                <div class="form-group">
+                    <label for="edit-profile-pic">Profile Picture URL</label>
+                    <input type="url" id="edit-profile-pic">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Snapchat Story Player Modal -->
+    <div id="story-player-modal" class="story-player-overlay hidden">
+        <div class="story-progress-bar-container" id="story-progress-bars">
+            <!-- Progress bars dynamic mapping -->
+        </div>
+        <button class="story-close-btn" onclick="closeStoryPlayer()">&times;</button>
+        
+        <div class="story-player-content">
+            <div class="story-player-header">
+                <img id="story-player-avatar" src="" alt="User Avatar">
+                <div>
+                    <span id="story-player-username">Username</span>
+                    <span id="story-player-time" class="story-time">Time</span>
+                </div>
+            </div>
+            
+            <div class="story-player-body">
+                <img id="story-image-item" src="" alt="Story Media" class="story-media hidden">
+                <video id="story-video-item" src="" class="story-media hidden" autoplay playsinline></video>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapchat Direct Message Chat Window Modal -->
+    <div id="chat-window-modal" class="modal hidden">
+        <div class="modal-content chat-modal-content">
+            <span class="close-modal" onclick="closeChatWindow()">&times;</span>
+            <div class="chat-window-header">
+                <img id="chat-window-avatar" src="" alt="Avatar" class="chat-header-avatar">
+                <div>
+                    <h4 id="chat-window-title">Chat with John</h4>
+                    <span id="chat-window-streak" class="streak-pill">🔥 0 Days</span>
+                </div>
+            </div>
+            <div class="chat-messages-container" id="chat-messages-output">
+                <!-- Chat bubbles dynamically loaded -->
+            </div>
+            <form id="chat-composer-form" class="chat-composer-form">
+                <div class="chat-composer-row">
+                    <textarea id="chat-message-input" placeholder="Send a snap..." rows="1"></textarea>
+                    
+                    <div class="chat-actions-row">
+                        <!-- Disappearing SNAP toggle -->
+                        <div class="snap-toggle-wrapper">
+                            <label class="snap-switch">
+                                <input type="checkbox" id="snap-disappearing-toggle">
+                                <span class="snap-slider round">⚡ Snap</span>
+                            </label>
+                        </div>
+                        
+                        <label for="chat-media-file" class="chat-file-upload-btn">
+                            📷
+                        </label>
+                        <input type="file" id="chat-media-file" accept="image/*,video/*" hidden>
+                        
+                        <button type="submit" class="btn btn-primary btn-sm">Send</button>
+                    </div>
+                </div>
+                <div id="chat-file-preview-name" class="chat-file-preview hidden">Selected image</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Explore Post Detail Modal -->
+    <div id="explore-post-modal" class="modal hidden">
+        <div class="modal-content explore-modal-content">
+            <span class="close-modal" onclick="closeExplorePostModal()">&times;</span>
+            <div id="explore-post-detail-container">
+                <!-- Large modal feed representation -->
+            </div>
         </div>
     </div>
 

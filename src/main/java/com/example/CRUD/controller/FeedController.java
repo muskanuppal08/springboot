@@ -23,4 +23,10 @@ public class FeedController {
         String username  = authentication.getName() ;
         return feedService.getFeed(username, page, size);
     }
+
+    @GetMapping("/explore")
+    public Page<PostResponseDto> getExploreFeed(@RequestParam int page, @RequestParam int size, Authentication authentication) {
+        String username = authentication.getName();
+        return feedService.getExploreFeed(username, page, size);
+    }
 }
