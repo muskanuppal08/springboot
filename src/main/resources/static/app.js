@@ -614,15 +614,15 @@ function renderSidebarProfile() {
     }
 
     // 2FA button text updates
-    const 2faBtn = document.getElementById('profile-2fa-btn');
+    const tfaBtn = document.getElementById('profile-2fa-btn');
     if (state.profile.twoFactorEnabled) {
-        2faBtn.textContent = '🔒 Disable 2FA';
-        2faBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
-        2faBtn.style.color = 'var(--text-main)';
+        tfaBtn.textContent = '🔒 Disable 2FA';
+        tfaBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
+        tfaBtn.style.color = 'var(--text-main)';
     } else {
-        2faBtn.textContent = '🔒 Enable 2FA';
-        2faBtn.style.backgroundColor = 'var(--primary-light)';
-        2faBtn.style.color = 'var(--primary)';
+        tfaBtn.textContent = '🔒 Enable 2FA';
+        tfaBtn.style.backgroundColor = 'var(--primary-light)';
+        tfaBtn.style.color = 'var(--primary)';
     }
 }
 
