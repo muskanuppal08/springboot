@@ -86,7 +86,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="reg-password">Password</label>
-                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                        <input type="password" id="reg-password" placeholder="Min. 8 chars, with letters" minlength="8" pattern="^(?=.*[a-zA-Z]).*$" title="Password must be at least 8 characters long and contain at least one letter." required>
                     </div>
                     <div class="form-group">
                         <label for="reg-name">Full Name</label>
@@ -96,11 +96,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="reg-phone">Phone Number</label>
-                        <input type="tel" id="reg-phone" placeholder="+1234567890">
+                        <input type="tel" id="reg-phone" placeholder="+1234567890" required>
                     </div>
                     <div class="form-group">
                         <label for="reg-profile-pic">Profile Picture Link</label>
-                        <input type="url" id="reg-profile-pic" placeholder="https://image-url.com">
+                        <input type="url" id="reg-profile-pic" placeholder="https://image-url.com" required>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Create Account</button>
