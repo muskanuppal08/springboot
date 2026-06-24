@@ -34,6 +34,12 @@ A premium, production-grade Spring Boot 4.x RESTful API backend for a Social Med
 - **Direct Snaps & Streaks:** Engage in real-time private messages. Support "View Once" snaps that disappear from the chat feed once clicked, and daily streaks 🔥 that increment when users message each other daily.
 - **Explore Grid (Instagram style):** Browse trending public vibes sorted by likes and comments popularity in a 3-column responsive photo grid.
 
+### 6. Authentication & Profile Upgrades (Module 1)
+- **OAuth2 Integrations:** Google and GitHub third-party login, automated user registration, and redirection with session JWTs.
+- **Two-Factor Authentication (2FA):** Google Authenticator compliance (TOTP RFC 6238) with base32 verification, time drift adjustments, and 2FA pending session locks.
+- **Short-Lived Password Reset:** SMTP mail tokens to request forgotten password resets.
+- **Enhanced Profile Customization:** Custom headers, website links, bio statements, and blue checkmark verified badges.
+
 ---
 
 ## 💻 Frontend Interface
@@ -45,7 +51,7 @@ The application features an interactive, responsive frontend. Once the Spring Bo
    - **🏠 Home Feed:** View chronological posts, post comments, like vibes, and view **Active Stories** at the top. Click your avatar to post a new 24h story!
    - **🧭 Explore Grid:** Search public trending media arranged in a 3-column Instagram photo grid. Click any image to view details, like, and comment in a modal drawer.
    - **💬 Chat Messages:** Chat with friends. Toggle the **⚡ Snap** button to send disappearing, view-once photos/videos, and maintain your **Daily Streak 🔥** count.
-   - **Profile Sidebar:** Track profile stats, toggle account visibility (Public/Private), and edit credentials.
+   - **Profile Sidebar:** Track profile stats, toggle account visibility (Public/Private), configure **2FA settings**, and edit credentials.
 
 ---
 
@@ -125,11 +131,11 @@ To run the application:
 
 Below is a module-wise roadmap of additional features that can be built on top of this backend codebase:
 
-### 📦 1. Authentication & Profile Module
-- **OAuth2 Integration:** Support logging in with third-party identity providers like Google, GitHub, or Facebook.
-- **Two-Factor Authentication (2FA):** Integrate TOTP (Time-Based One-Time Password) verification using Google Authenticator or SMS.
-- **Password Reset Flow:** Request short-lived email tokens to safely reset forgotten passwords.
-- **Profile Customization:** Support bio sections, custom headers, external links, and verification badges.
+### 📦 1. Authentication & Profile Module (Completed ✅)
+- **OAuth2 Integration:** Support logging in with Google, GitHub, or Facebook.
+- **Two-Factor Authentication (2FA):** Google Authenticator verification.
+- **Password Reset Flow:** Safe email reset tokens recovery.
+- **Profile Customization:** Bios, headers, websites, and verified tick badges.
 
 ### 📦 2. Engagement & Social Graph Module
 - **Private Accounts & Follow Requests:** Allow users to set their profile to private. When private, follow attempts generate "Pending" requests that must be explicitly approved.
