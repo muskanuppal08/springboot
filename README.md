@@ -40,6 +40,11 @@ A premium, production-grade Spring Boot 4.x RESTful API backend for a Social Med
 - **Short-Lived Password Reset:** SMTP mail tokens to request forgotten password resets.
 - **Enhanced Profile Customization:** Custom headers, website links, bio statements, and blue checkmark verified badges.
 
+### 7. Engagement & Social Graph (Module 2)
+- **Private Profiles & Follow Requests:** Allow users to set their account visibility (Public/Private). Follows to private users remain `PENDING` until explicitly approved.
+- **Block & Mute Actions:** Support blocking and muting users. Blocks automatically terminate existing follows in both directions. Blocked or muted users' posts are filtered from home feeds, explore grids, search results, and streaks. Direct messages between blocked users are blocked.
+- **Bookmarks / Saved Vibes:** Toggles to bookmark/save vibes, rendering them in a private collections tab/grid.
+
 ---
 
 ## 💻 Frontend Interface
@@ -51,7 +56,9 @@ The application features an interactive, responsive frontend. Once the Spring Bo
    - **🏠 Home Feed:** View chronological posts, post comments, like vibes, and view **Active Stories** at the top. Click your avatar to post a new 24h story!
    - **🧭 Explore Grid:** Search public trending media arranged in a 3-column Instagram photo grid. Click any image to view details, like, and comment in a modal drawer.
    - **💬 Chat Messages:** Chat with friends. Toggle the **⚡ Snap** button to send disappearing, view-once photos/videos, and maintain your **Daily Streak 🔥** count.
-   - **Profile Sidebar:** Track profile stats, toggle account visibility (Public/Private), configure **2FA settings**, and edit credentials.
+   - **🔖 Saved Vibes:** View all the vibes you have bookmarked from explore or home feed timelines in a clean, private grid format.
+   - **Profile Sidebar:** Track profile stats, toggle account visibility (Public/Private), configure **2FA settings**, edit credentials, and open **Blocked & Muted Lists** to manage user restrictions.
+   - **Incoming Follow Requests:** Sidebar widget that automatically reveals incoming requests from users waiting to follow your private profile, allowing immediate accept/reject actions.
 
 ---
 
@@ -137,7 +144,7 @@ Below is a module-wise roadmap of additional features that can be built on top o
 - **Password Reset Flow:** Safe email reset tokens recovery.
 - **Profile Customization:** Bios, headers, websites, and verified tick badges.
 
-### 📦 2. Engagement & Social Graph Module
+### 📦 2. Engagement & Social Graph Module (Completed ✅)
 - **Private Accounts & Follow Requests:** Allow users to set their profile to private. When private, follow attempts generate "Pending" requests that must be explicitly approved.
 - **Block & Mute Lists:** Allow users to block or mute accounts to restrict interactions and visibility.
 - **Bookmarks/Saved Posts:** Let users save posts to private folders/collections.
