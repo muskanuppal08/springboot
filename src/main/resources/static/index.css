@@ -245,7 +245,13 @@ body {
 .auth-footer a {
     color: var(--primary);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.auth-footer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
 }
 
 /* App Header & Layout */

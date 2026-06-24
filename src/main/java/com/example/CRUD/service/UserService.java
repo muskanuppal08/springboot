@@ -129,9 +129,16 @@ public class UserService {
         UUID uuid = UUID.randomUUID();
         token.setToken(uuid.toString());
 
+        try {
+            sendVerificationEmail(user, uuid.toString());
+        } catch (Exception e) {
+            System.err.println("Email sending failed, but user registration is continuing: " + e.getMessage());
+        }
 
-        sendVerificationEmail(user, uuid.toString());
-
+        System.out.println("\n=== REGISTRATION SUCCESS ===");
+        System.out.println("User: " + user.getUsername());
+        System.out.println("Verification Link: http://localhost:8080/auth/verify?token=" + uuid.toString());
+        System.out.println("============================\n");
 
         userRepository.save(user);
         userInfoRepository.save(user.getUserInfo());
