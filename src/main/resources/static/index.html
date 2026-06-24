@@ -182,6 +182,7 @@
 
                         <button id="profile-2fa-btn" class="btn btn-secondary btn-block btn-sm" style="margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">🔒 Configure 2FA</button>
                         <button id="edit-profile-btn" class="btn btn-outline btn-block btn-sm">Edit Details</button>
+                        <button id="profile-relations-btn" class="btn btn-secondary btn-block btn-sm" style="margin-top: 8px;">⚙️ Blocked & Muted Lists</button>
                     </div>
                 </div>
 
@@ -191,6 +192,7 @@
                         <li class="nav-item active" id="nav-home-btn">🏠 Home Feed</li>
                         <li class="nav-item" id="nav-explore-btn">🧭 Explore Grid</li>
                         <li class="nav-item" id="nav-chats-btn">💬 Chat Messages</li>
+                        <li class="nav-item" id="nav-saved-btn">🔖 Saved Vibes</li>
                     </ul>
                 </div>
             </aside>
@@ -266,6 +268,20 @@
                     </div>
                 </div>
 
+                <!-- Workspace 4: Saved Vibes Grid -->
+                <div id="workspace-saved" class="hidden">
+                    <div class="grid-header">
+                        <h4>Saved Vibes</h4>
+                        <p>Your private bookmark collection</p>
+                    </div>
+                    <div id="saved-grid" class="explore-photo-grid">
+                        <!-- 3 column Saved photo layout dynamically loaded -->
+                    </div>
+                    <div class="pagination-footer">
+                        <button id="load-more-saved-btn" class="btn btn-outline">Load More Saved Vibes</button>
+                    </div>
+                </div>
+
                 <!-- Workspace 3: Direct Messaging and Snap Streaks (Snapchat style) -->
                 <div id="workspace-chats" class="hidden">
                     <div class="card chat-workspace-card">
@@ -293,6 +309,16 @@
                     <div class="social-list-content">
                         <div id="following-list" class="social-list"></div>
                         <div id="followers-list" class="social-list hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Follow Requests Box -->
+                <div class="card requests-card hidden" id="pending-requests-card">
+                    <div class="card-header">
+                        <h4>Follow Requests</h4>
+                    </div>
+                    <div id="pending-requests-list" class="suggested-list">
+                        <!-- Pending requests dynamically rendered -->
                     </div>
                 </div>
 
@@ -430,6 +456,24 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Set New Password</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Relations Modal -->
+    <div id="relations-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-relations-modal">&times;</span>
+            <h4>Manage Relationships</h4>
+            <div class="search-tabs" style="margin-bottom:15px;">
+                <button id="tab-blocked-list" class="tab-btn active">Blocked</button>
+                <button id="tab-muted-list" class="tab-btn">Muted</button>
+            </div>
+            <div id="blocked-users-list" class="suggested-list">
+                <!-- Blocked users loaded here -->
+            </div>
+            <div id="muted-users-list" class="suggested-list hidden">
+                <!-- Muted users loaded here -->
+            </div>
         </div>
     </div>
 

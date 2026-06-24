@@ -3,6 +3,7 @@ package com.example.CRUD.service;
 import com.example.CRUD.entity.DirectMessage;
 import com.example.CRUD.entity.Streak;
 import com.example.CRUD.entity.User;
+import com.example.CRUD.repository.BlockRepository;
 import com.example.CRUD.repository.DirectMessageRepository;
 import com.example.CRUD.repository.StreakRepository;
 import com.example.CRUD.repository.UserRepository;
@@ -24,12 +25,18 @@ public class ChatService {
     private final StreakRepository streakRepository;
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
+    private final BlockRepository blockRepository;
 
     @Transactional
     public DirectMessage sendMessage(String senderName, Long recipientId, String content, MultipartFile file, boolean disappearing) {
         User sender = userRepository.findByUsername(senderName);
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+        if (blockRepository.existsByBlockerIdAndBlockedId(sender.getId(), recipient.getId()) ||
+            blockRepository.existsByBlockerIdAndBlockedId(recipient.getId(), sender.getId())) {
+            throw new RuntimeException("Cannot send message: Blocked relationship exists");
+        }
 
         DirectMessage dm = new DirectMessage();
         dm.setSender(sender);
@@ -70,7 +77,13 @@ public class ChatService {
 
     public List<Streak> getStreaks(String username) {
         User user = userRepository.findByUsername(username);
-        return streakRepository.findAllByUserId(user.getId());
+        List<Streak> streaks = streakRepository.findAllByUserId(user.getId());
+        return streaks.stream().filter(s -> {
+            User other = s.getUser1().getId() == user.getId() ? s.getUser2() : s.getUser1();
+            boolean blocked = blockRepository.existsByBlockerIdAndBlockedId(user.getId(), other.getId())
+                    || blockRepository.existsByBlockerIdAndBlockedId(other.getId(), user.getId());
+            return !blocked;
+        }).toList();
     }
 
     private void updateStreak(User sender, User recipient) {

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDto {
+    private Long id;
     private String content;
     private String mediaUrl ;
     private LocalDateTime createdAt ;

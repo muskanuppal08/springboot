@@ -29,7 +29,16 @@ const state = {
     streaks: [],
     currentChatUser: null,
     chatMessages: [],
-    chatPollInterval: null
+    chatPollInterval: null,
+    
+    // Module 2 states
+    savedPage: 0,
+    savedSize: 12,
+    hasMoreSaved: true,
+    bookmarkedPostIds: new Set(),
+    blockedUsers: [],
+    mutedUsers: [],
+    relationsTab: 'blocked'
 };
 
 // API Configuration Mapping
@@ -228,11 +237,48 @@ function setupEventListeners() {
     });
     document.getElementById('clear-search-btn').addEventListener('click', clearSearchResults);
 
-    // Sidebar View Workspace Toggles (Home, Explore, Chats)
+    // Sidebar View Workspace Toggles (Home, Explore, Chats, Saved)
     document.getElementById('nav-home-btn').addEventListener('click', () => toggleWorkspace('home'));
     document.getElementById('nav-explore-btn').addEventListener('click', () => toggleWorkspace('explore'));
     document.getElementById('nav-chats-btn').addEventListener('click', () => toggleWorkspace('chats'));
+    document.getElementById('nav-saved-btn').addEventListener('click', () => toggleWorkspace('saved'));
     document.getElementById('header-logo-btn').addEventListener('click', () => toggleWorkspace('home'));
+
+    document.getElementById('load-more-saved-btn').addEventListener('click', () => {
+        state.savedPage++;
+        loadSavedVibes(true);
+    });
+
+    // Relations lists management
+    document.getElementById('profile-relations-btn').addEventListener('click', openRelationsModal);
+    document.getElementById('close-relations-modal').addEventListener('click', closeRelationsModal);
+    
+    document.getElementById('tab-blocked-list').addEventListener('click', () => {
+        state.relationsTab = 'blocked';
+        document.getElementById('tab-blocked-list').classList.add('active');
+        document.getElementById('tab-muted-list').classList.remove('active');
+        document.getElementById('blocked-users-list').classList.remove('hidden');
+        document.getElementById('muted-users-list').classList.add('hidden');
+        loadBlockedUsers();
+    });
+
+    document.getElementById('tab-muted-list').addEventListener('click', () => {
+        state.relationsTab = 'muted';
+        document.getElementById('tab-muted-list').classList.add('active');
+        document.getElementById('tab-blocked-list').classList.remove('active');
+        document.getElementById('muted-users-list').classList.remove('hidden');
+        document.getElementById('blocked-users-list').classList.add('hidden');
+        loadMutedUsers();
+    });
+
+    // Dismiss all active post header menus on click away
+    document.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('menu-trigger-btn')) {
+            document.querySelectorAll('.post-menu-dropdown').forEach(dropdown => {
+                dropdown.classList.add('hidden');
+            });
+        }
+    });
 
     // Stories tray add story hook
     document.getElementById('self-story-btn').addEventListener('click', () => {
@@ -299,6 +345,7 @@ function toggleWorkspace(target) {
     document.getElementById('workspace-home').classList.add('hidden');
     document.getElementById('workspace-explore').classList.add('hidden');
     document.getElementById('workspace-chats').classList.add('hidden');
+    document.getElementById('workspace-saved').classList.add('hidden');
     document.getElementById('stories-tray-box').classList.add('hidden');
 
     if (target === 'home') {
@@ -312,6 +359,11 @@ function toggleWorkspace(target) {
     } else if (target === 'chats') {
         document.getElementById('workspace-chats').classList.remove('hidden');
         loadChatStreaks();
+    } else if (target === 'saved') {
+        document.getElementById('workspace-saved').classList.remove('hidden');
+        state.savedPage = 0;
+        state.hasMoreSaved = true;
+        loadSavedVibes();
     }
 }
 
@@ -353,7 +405,9 @@ async function showAppView() {
     await Promise.all([
         loadSuggestedUsers(),
         loadFollowingList(),
-        loadFollowersList()
+        loadFollowersList(),
+        loadFollowRequests(),
+        loadBookmarkedPostIds()
     ]);
 }
 
@@ -832,6 +886,7 @@ function renderTimeline(posts, containerId = 'feed-timeline') {
             }
         }
 
+        const isBookmarked = state.bookmarkedPostIds && state.bookmarkedPostIds.has(post.id);
         postCard.innerHTML = `
             <div class="post-header">
                 <div class="post-author-info">
@@ -844,6 +899,14 @@ function renderTimeline(posts, containerId = 'feed-timeline') {
                         <div class="post-timestamp">${dateStr}</div>
                     </div>
                 </div>
+                ${post.username.toLowerCase() !== state.username.toLowerCase() ? `
+                <div class="post-header-menu">
+                    <button class="menu-trigger-btn" onclick="togglePostMenu(event, ${post.id}, '${containerId}')">⋮</button>
+                    <div id="${containerId}-post-menu-${post.id}" class="post-menu-dropdown hidden">
+                        <button onclick="handleMuteUser(${author ? author.id : 0}, '${post.username}')">🔇 Mute @${post.username}</button>
+                        <button onclick="handleBlockUser(${author ? author.id : 0}, '${post.username}')">🚫 Block @${post.username}</button>
+                    </div>
+                </div>` : ''}
             </div>
             <div class="post-content-text">${post.content}</div>
             ${mediaHtml}
@@ -853,6 +916,9 @@ function renderTimeline(posts, containerId = 'feed-timeline') {
                 </button>
                 <button class="action-btn comment-btn" onclick="toggleCommentsSection(${post.id}, '${containerId}')">
                     💬 <span>${post.commentsCount}</span> Comments
+                </button>
+                <button class="action-btn bookmark-btn ${isBookmarked ? 'active' : ''}" onclick="toggleBookmark(${post.id}, '${containerId}')">
+                    🔖 <span class="bookmark-text">${isBookmarked ? 'Saved' : 'Save'}</span>
                 </button>
             </div>
             <div id="${containerId}-comments-section-${post.id}" class="comments-section hidden">
@@ -1678,3 +1744,360 @@ window.openExplorePostModal = function(post) {
 window.closeExplorePostModal = function() {
     document.getElementById('explore-post-modal').classList.add('hidden');
 };
+
+/* ========================================================
+   MODULE 2 SOCIAL ENGAGEMENT & GRAPH ADDITIONAL HELPERS
+   ======================================================== */
+
+// Load follow requests
+async function loadFollowRequests() {
+    const card = document.getElementById('pending-requests-card');
+    const list = document.getElementById('pending-requests-list');
+    list.innerHTML = '';
+
+    try {
+        const response = await apiFetch('/follow/requests');
+        if (!response.ok) throw new Error('Requests fetch failed');
+        const requests = await response.json();
+
+        if (requests.length === 0) {
+            card.classList.add('hidden');
+            return;
+        }
+
+        card.classList.remove('hidden');
+        requests.forEach(user => {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.innerHTML = `
+                <div class="user-item-info">
+                    <img class="user-item-avatar" src="${user.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}" alt="Avatar">
+                    <div class="user-item-details">
+                        <span class="user-item-name">${user.name || user.username}</span>
+                        <span class="user-item-handle">@${user.username}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 4px;">
+                    <button class="btn btn-primary btn-sm" onclick="acceptFollowRequest(${user.id})">Accept</button>
+                    <button class="btn btn-outline btn-sm" onclick="rejectFollowRequest(${user.id})">Reject</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    } catch (err) {
+        console.error('Follow requests error:', err);
+    }
+}
+
+window.acceptFollowRequest = async function(followerId) {
+    try {
+        const response = await apiFetch(`/follow/accept/${followerId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Accept failed');
+        showToast('Follow request approved!');
+        await loadFollowRequests();
+        await loadFollowersList();
+        await loadSuggestedUsers();
+    } catch (err) {
+        showToast('Error accepting request.', true);
+    }
+};
+
+window.rejectFollowRequest = async function(followerId) {
+    try {
+        const response = await apiFetch(`/follow/reject/${followerId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Reject failed');
+        showToast('Follow request declined.');
+        await loadFollowRequests();
+    } catch (err) {
+        showToast('Error rejecting request.', true);
+    }
+};
+
+// Bookmarked list IDs loading
+async function loadBookmarkedPostIds() {
+    try {
+        const response = await apiFetch(`/post/bookmarked?page=0&size=1000`);
+        if (response.ok) {
+            const data = await response.json();
+            const posts = data.content || [];
+            state.bookmarkedPostIds = new Set(posts.map(p => p.id));
+        }
+    } catch (err) {
+        console.error('Failed to load bookmarked post IDs:', err);
+    }
+}
+
+// Toggle Bookmark Save/Unsave
+window.toggleBookmark = async function(postId, containerId = 'feed-timeline') {
+    try {
+        const response = await apiFetch(`/post/bookmark/${postId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Bookmark toggle failed');
+        const text = await response.text();
+        
+        const postCard = document.getElementById(`${containerId}-post-${postId}`);
+        if (text === 'Bookmark added') {
+            state.bookmarkedPostIds.add(postId);
+            showToast('Saved to your collection.');
+            if (postCard) {
+                const btn = postCard.querySelector('.bookmark-btn');
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.querySelector('.bookmark-text').textContent = 'Saved';
+                }
+            }
+        } else {
+            state.bookmarkedPostIds.delete(postId);
+            showToast('Removed from bookmarks.');
+            if (postCard) {
+                const btn = postCard.querySelector('.bookmark-btn');
+                if (btn) {
+                    btn.classList.remove('active');
+                    btn.querySelector('.bookmark-text').textContent = 'Save';
+                }
+            }
+            if (containerId === 'saved-grid') {
+                // If in saved workspace, reload saved views to reflect changes
+                loadSavedVibes();
+            }
+        }
+        
+        // Update explore modal detail copy too if it is currently open
+        const detailCard = document.getElementById(`explore-post-detail-container-post-${postId}`);
+        if (detailCard && containerId !== 'explore-post-detail-container') {
+            const btn = detailCard.querySelector('.bookmark-btn');
+            if (btn) {
+                if (text === 'Bookmark added') {
+                    btn.classList.add('active');
+                    btn.querySelector('.bookmark-text').textContent = 'Saved';
+                } else {
+                    btn.classList.remove('active');
+                    btn.querySelector('.bookmark-text').textContent = 'Save';
+                }
+            }
+        }
+    } catch (err) {
+        showToast('Error toggling bookmark status.', true);
+    }
+};
+
+// Load saved vibes list
+async function loadSavedVibes(loadMore = false) {
+    const grid = document.getElementById('saved-grid');
+    if (!loadMore) {
+        grid.innerHTML = 'Loading saved vibes...';
+        state.savedPage = 0;
+    }
+    
+    try {
+        const response = await apiFetch(`/post/bookmarked?page=${state.savedPage}&size=${state.savedSize}`);
+        if (!response.ok) throw new Error('Failed to load saved vibes');
+        const data = await response.json();
+        const posts = data.content || [];
+        
+        if (!loadMore) grid.innerHTML = '';
+        
+        if (posts.length === 0 && !loadMore) {
+            grid.innerHTML = '<div style="grid-column: 1/4; text-align: center; color: var(--text-muted); padding: 30px;">You haven\'t saved any vibes yet.</div>';
+            document.getElementById('load-more-saved-btn').classList.add('hidden');
+            return;
+        }
+        
+        posts.forEach(post => {
+            const div = document.createElement('div');
+            div.className = 'explore-grid-item';
+            div.onclick = () => openExplorePostModal(post);
+            
+            let thumbnailHtml = '';
+            if (post.mediaUrl) {
+                if (post.mediaUrl.match(/\.(mp4|webm|ogg)$/i) || post.mediaUrl.includes('video')) {
+                    thumbnailHtml = `<video src="${post.mediaUrl}" muted style="width:100%; height:100%; object-fit:cover;"></video>`;
+                } else {
+                    thumbnailHtml = `<img src="${post.mediaUrl}" alt="Saved vibe">`;
+                }
+            } else {
+                thumbnailHtml = `
+                    <div style="background: linear-gradient(135deg, hsl(230, 80%, 90%), hsl(328, 80%, 90%)); width: 100%; height: 100%; padding: 16px; font-size: 0.8rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-style: italic;">
+                        "${post.content.length > 50 ? post.content.substring(0, 47) + '...' : post.content}"
+                    </div>
+                `;
+            }
+            
+            div.innerHTML = `
+                ${thumbnailHtml}
+                <div class="explore-grid-overlay">
+                    <span>❤️ ${post.likeCount}</span>
+                    <span>💬 ${post.commentsCount}</span>
+                </div>
+            `;
+            grid.appendChild(div);
+        });
+        
+        if (data.last) {
+            document.getElementById('load-more-saved-btn').classList.add('hidden');
+        } else {
+            document.getElementById('load-more-saved-btn').classList.remove('hidden');
+        }
+    } catch (err) {
+        grid.innerHTML = 'Error loading saved vibes.';
+    }
+}
+
+// Toggle Post action options menu dropdown
+window.togglePostMenu = function(event, postId, containerId) {
+    event.stopPropagation();
+    const dropdown = document.getElementById(`${containerId}-post-menu-${postId}`);
+    const isHidden = dropdown.classList.contains('hidden');
+    
+    // Hide all other dropdowns
+    document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+    
+    if (isHidden) {
+        dropdown.classList.remove('hidden');
+    }
+};
+
+// Handle Mute Action
+window.handleMuteUser = async function(targetUserId, username) {
+    try {
+        const response = await apiFetch(`/user/mute/${targetUserId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Mute failed');
+        const text = await response.text();
+        showToast(text);
+        
+        await cacheAllUsers();
+        
+        // Refresh visible workspace content
+        if (!document.getElementById('workspace-home').classList.contains('hidden')) {
+            state.feedPage = 0;
+            await loadFeed();
+        }
+        if (!document.getElementById('workspace-explore').classList.contains('hidden')) {
+            await loadExploreGrid();
+        }
+        if (!document.getElementById('relations-modal').classList.contains('hidden')) {
+            loadMutedUsers();
+        }
+    } catch (err) {
+        showToast('Failed to mute user.', true);
+    }
+};
+
+// Handle Block Action
+window.handleBlockUser = async function(targetUserId, username) {
+    if (!confirm(`Are you sure you want to block @${username}? This will remove all follow relationships and block direct messaging.`)) {
+        return;
+    }
+    
+    try {
+        const response = await apiFetch(`/user/block/${targetUserId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Block failed');
+        const text = await response.text();
+        showToast(text);
+        
+        await cacheAllUsers();
+        
+        // If currently in conversation with this user, close the window
+        if (state.currentChatUser && state.currentChatUser.id === targetUserId) {
+            closeChatWindow();
+        }
+        
+        // Reset and reload feeds
+        state.feedPage = 0;
+        await loadFeed();
+        await loadExploreGrid();
+        
+        // Reload relationships and follow list stats
+        await loadFollowingList();
+        await loadFollowersList();
+        await loadSuggestedUsers();
+        await loadFollowRequests();
+        
+        if (!document.getElementById('relations-modal').classList.contains('hidden')) {
+            loadBlockedUsers();
+        }
+    } catch (err) {
+        showToast('Failed to block user.', true);
+    }
+};
+
+// Relations modal handling
+window.openRelationsModal = function() {
+    document.getElementById('relations-modal').classList.remove('hidden');
+    document.getElementById('tab-blocked-list').click();
+};
+
+window.closeRelationsModal = function() {
+    document.getElementById('relations-modal').classList.add('hidden');
+};
+
+async function loadBlockedUsers() {
+    const list = document.getElementById('blocked-users-list');
+    list.innerHTML = 'Loading blocked users...';
+    
+    try {
+        const response = await apiFetch('/user/blocked');
+        if (!response.ok) throw new Error('Failed to load blocked users');
+        const blocked = await response.json();
+        
+        list.innerHTML = '';
+        if (blocked.length === 0) {
+            list.innerHTML = '<div style="text-align:center; font-size:0.85rem; color:var(--text-light); padding:15px;">No blocked accounts.</div>';
+            return;
+        }
+        
+        blocked.forEach(user => {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.innerHTML = `
+                <div class="user-item-info">
+                    <img class="user-item-avatar" src="${user.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}" alt="Avatar">
+                    <div class="user-item-details">
+                        <span class="user-item-name">${user.name || user.username}</span>
+                        <span class="user-item-handle">@${user.username}</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="handleBlockUser(${user.id}, '${user.username}')">Unblock</button>
+            `;
+            list.appendChild(div);
+        });
+    } catch (err) {
+        list.innerHTML = 'Error loading blocked list.';
+    }
+}
+
+async function loadMutedUsers() {
+    const list = document.getElementById('muted-users-list');
+    list.innerHTML = 'Loading muted users...';
+    
+    try {
+        const response = await apiFetch('/user/muted');
+        if (!response.ok) throw new Error('Failed to load muted users');
+        const muted = await response.json();
+        
+        list.innerHTML = '';
+        if (muted.length === 0) {
+            list.innerHTML = '<div style="text-align:center; font-size:0.85rem; color:var(--text-light); padding:15px;">No muted accounts.</div>';
+            return;
+        }
+        
+        muted.forEach(user => {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.innerHTML = `
+                <div class="user-item-info">
+                    <img class="user-item-avatar" src="${user.profilePic || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}" alt="Avatar">
+                    <div class="user-item-details">
+                        <span class="user-item-name">${user.name || user.username}</span>
+                        <span class="user-item-handle">@${user.username}</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="handleMuteUser(${user.id}, '${user.username}')">Unmute</button>
+            `;
+            list.appendChild(div);
+        });
+    } catch (err) {
+        list.innerHTML = 'Error loading muted list.';
+    }
+}

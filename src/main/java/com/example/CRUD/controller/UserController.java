@@ -50,14 +50,29 @@ public class UserController {
         userService.toggleVisible(username);
 
         return ResponseEntity.ok().build();
-
     }
 
+    @PostMapping("/block/{userId}")
+    public ResponseEntity<String> toggleBlockUser(@PathVariable long userId, Authentication authentication) {
+        String result = userService.toggleBlockUser(authentication.getName(), userId);
+        return ResponseEntity.ok(result);
+    }
 
+    @PostMapping("/mute/{userId}")
+    public ResponseEntity<String> toggleMuteUser(@PathVariable long userId, Authentication authentication) {
+        String result = userService.toggleMuteUser(authentication.getName(), userId);
+        return ResponseEntity.ok(result);
+    }
 
+    @GetMapping("/blocked")
+    public ResponseEntity<List<UserResponseDto>> getBlockedUsers(Authentication authentication) {
+        List<UserResponseDto> blocked = userService.getBlockedUsers(authentication.getName());
+        return ResponseEntity.ok(blocked);
+    }
 
-
-
-
-
+    @GetMapping("/muted")
+    public ResponseEntity<List<UserResponseDto>> getMutedUsers(Authentication authentication) {
+        List<UserResponseDto> muted = userService.getMutedUsers(authentication.getName());
+        return ResponseEntity.ok(muted);
+    }
 }

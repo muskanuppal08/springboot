@@ -65,8 +65,44 @@ public class FollowService {
         Follow follow = new Follow();
         follow.setFollowing(following);
         follow.setFollower(follower);
-        follow.setFollowStatus(FollowStatus.PENDING);
+        // If profile is public (visible = true), directly set status to FOLLOWING.
+        // Otherwise set to PENDING.
+        if (following.isVisible()) {
+            follow.setFollowStatus(FollowStatus.FOLLOWING);
+        } else {
+            follow.setFollowStatus(FollowStatus.PENDING);
+        }
         followRepository.save(follow) ;
 
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void acceptFollowRequest(long followerId, String followingUsername) {
+        User following = userRepository.findByUsername(followingUsername);
+        Follow follow = followRepository.findByFollowerIdAndFollowingId(followerId, following.getId())
+                .orElseThrow(() -> new RuntimeException("Follow request not found"));
+
+        follow.setFollowStatus(FollowStatus.FOLLOWING);
+        followRepository.save(follow);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void rejectFollowRequest(long followerId, String followingUsername) {
+        User following = userRepository.findByUsername(followingUsername);
+        Follow follow = followRepository.findByFollowerIdAndFollowingId(followerId, following.getId())
+                .orElseThrow(() -> new RuntimeException("Follow request not found"));
+
+        followRepository.delete(follow);
+    }
+
+    public List<User> getPendingRequests(String username) {
+        User user = userRepository.findByUsername(username);
+        List<Follow> requests = followRepository.findByFollowingIdAndFollowStatus(user.getId(), FollowStatus.PENDING);
+
+        List<User> followers = new ArrayList<>();
+        for (Follow f : requests) {
+            followers.add(f.getFollower());
+        }
+        return followers;
     }
 }

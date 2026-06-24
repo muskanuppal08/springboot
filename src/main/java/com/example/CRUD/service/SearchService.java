@@ -38,6 +38,7 @@ public class SearchService {
 
     private PostResponseDto toDto(Post post){
         PostResponseDto dto = new PostResponseDto();
+        dto.setId(post.getId());
         dto.setUsername(post.getUser().getUsername());
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());
@@ -49,24 +50,36 @@ public class SearchService {
     }
 
 
-    public Page<UserResponseDto> searchUser(String username , int page , int size){
+    public Page<UserResponseDto> searchUser(String username , int page , int size, String currentUsername){
         Pageable pageable = PageRequest.of(page, size);
-        Page<User> users = userRepository.findByUsernameContainingIgnoreCase(username , pageable) ;
+        Page<User> users;
+        User currentUser = currentUsername != null ? userRepository.findByUsername(currentUsername) : null;
+        if (currentUser != null) {
+            users = userRepository.searchUsersExcludingBlocked(username, currentUser.getId(), pageable);
+        } else {
+            users = userRepository.findByUsernameContainingIgnoreCase(username , pageable) ;
+        }
 
         return users.map(this::toResponseDto) ;
     }
 
     // search post
 
-    public Page<PostResponseDto> searchPost(String content , int page , int size){
+    public Page<PostResponseDto> searchPost(String content , int page , int size, String currentUsername){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Post> posts = postRepository.findByContentContainsIgnoreCase(content, pageable);
+        Page<Post> posts;
+        User currentUser = currentUsername != null ? userRepository.findByUsername(currentUsername) : null;
+        if (currentUser != null) {
+            posts = postRepository.searchPostsExcludingBlocked(content, currentUser.getId(), pageable);
+        } else {
+            posts = postRepository.findByContentContainsIgnoreCase(content, pageable);
+        }
 
         return posts.map(this::toDto);
 
     }
 
-    public GlobalSearchResponseDto searchGlobalSearch(String content , int page , int size , String type){
+    public GlobalSearchResponseDto searchGlobalSearch(String content , int page , int size , String type, String currentUsername){
         GlobalSearchResponseDto response = new GlobalSearchResponseDto();
         boolean isUserSearch = "user".equalsIgnoreCase(type);
         boolean isPostSearch = "post".equalsIgnoreCase(type);
@@ -77,11 +90,11 @@ public class SearchService {
         }
 
         if(isUserSearch){
-            response.setUsers(searchUser(content,page,size));
+            response.setUsers(searchUser(content,page,size, currentUsername));
         }
 
         if(isPostSearch){
-            response.setPosts(searchPost(content,page,size));
+            response.setPosts(searchPost(content,page,size, currentUsername));
         }
 
         return response;

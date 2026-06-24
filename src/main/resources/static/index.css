@@ -1378,3 +1378,95 @@ textarea#edit-bio:focus {
     background: #ffffff;
     border-color: var(--primary);
 }
+
+/* --- Engagement & Relations module 2 --- */
+
+.post-header-menu {
+    position: relative;
+}
+
+.menu-trigger-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 50%;
+    transition: background 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-trigger-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+}
+
+.post-menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    min-width: 160px;
+    overflow: hidden;
+    margin-top: 5px;
+    animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.post-menu-dropdown button {
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: background 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-menu-dropdown button:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Bookmark Active styling */
+.bookmark-btn.active {
+    color: var(--primary) !important;
+    font-weight: 600;
+}
+
+/* Relations tabs inside Modal */
+.relations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 350px;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.relations-list .user-item {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+.relations-list .user-item:last-child {
+    border-bottom: none;
+}

@@ -9,6 +9,9 @@ import com.example.CRUD.repository.TokenRepository;
 import com.example.CRUD.repository.UserInfoRepository;
 import com.example.CRUD.repository.UserRepository;
 import com.example.CRUD.repository.PasswordResetTokenRepository;
+import com.example.CRUD.repository.BlockRepository;
+import com.example.CRUD.repository.MuteRepository;
+import com.example.CRUD.repository.FollowRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +43,15 @@ public class UserService {
 
     @Autowired
     private PasswordResetTokenRepository resetTokenRepository;
+
+    @Autowired
+    private BlockRepository blockRepository;
+
+    @Autowired
+    private MuteRepository muteRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
 
 
 
@@ -357,5 +370,73 @@ public class UserService {
         User user = userRepository.findByUsername(username);
         if (user == null || !user.getUserInfo().isTwoFactorEnabled()) return false;
         return TotpUtil.verifyCode(user.getUserInfo().getTwoFactorSecret(), code);
+    }
+
+    @Transactional
+    public String toggleBlockUser(String currentUsername, long targetUserId) {
+        User blocker = userRepository.findByUsername(currentUsername);
+        User blocked = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        if (blocker.getId() == blocked.getId()) {
+            throw new RuntimeException("Cannot block yourself");
+        }
+
+        Optional<Block> existing = blockRepository.findByBlockerIdAndBlockedId(blocker.getId(), blocked.getId());
+        if (existing.isPresent()) {
+            blockRepository.delete(existing.get());
+            return "Unblocked successfully";
+        } else {
+            // Delete existing follows
+            followRepository.findByFollowerIdAndFollowingId(blocker.getId(), blocked.getId())
+                    .ifPresent(followRepository::delete);
+            followRepository.findByFollowerIdAndFollowingId(blocked.getId(), blocker.getId())
+                    .ifPresent(followRepository::delete);
+
+            Block block = new Block();
+            block.setBlocker(blocker);
+            block.setBlocked(blocked);
+            blockRepository.save(block);
+            return "Blocked successfully";
+        }
+    }
+
+    @Transactional
+    public String toggleMuteUser(String currentUsername, long targetUserId) {
+        User muter = userRepository.findByUsername(currentUsername);
+        User muted = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        if (muter.getId() == muted.getId()) {
+            throw new RuntimeException("Cannot mute yourself");
+        }
+
+        Optional<Mute> existing = muteRepository.findByMuterIdAndMutedId(muter.getId(), muted.getId());
+        if (existing.isPresent()) {
+            muteRepository.delete(existing.get());
+            return "Unmuted successfully";
+        } else {
+            Mute mute = new Mute();
+            mute.setMuter(muter);
+            mute.setMuted(muted);
+            muteRepository.save(mute);
+            return "Muted successfully";
+        }
+    }
+
+    public List<UserResponseDto> getBlockedUsers(String username) {
+        User user = userRepository.findByUsername(username);
+        List<Block> blocks = blockRepository.findByBlockerId(user.getId());
+        return blocks.stream()
+                .map(b -> toResponseDto(b.getBlocked()))
+                .toList();
+    }
+
+    public List<UserResponseDto> getMutedUsers(String username) {
+        User user = userRepository.findByUsername(username);
+        List<Mute> mutes = muteRepository.findByMuterId(user.getId());
+        return mutes.stream()
+                .map(m -> toResponseDto(m.getMuted()))
+                .toList();
     }
 }

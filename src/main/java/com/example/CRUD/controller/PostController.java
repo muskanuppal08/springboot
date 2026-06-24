@@ -6,6 +6,7 @@ import com.example.CRUD.dto.PostResponseDto;
 import com.example.CRUD.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -76,5 +77,22 @@ public class PostController {
         String username = authentication.getName();
 
         return ResponseEntity.ok(postService.delete(id, username));
+    }
+
+    @PostMapping("/bookmark/{postId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<String> toggleBookmark(@PathVariable Long postId, Authentication authentication) {
+        String result = postService.toggleBookmark(postId, authentication.getName());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/bookmarked")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Page<PostResponseDto>> getBookmarkedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+        Page<PostResponseDto> response = postService.getBookmarkedPosts(authentication.getName(), page, size);
+        return ResponseEntity.ok(response);
     }
 }

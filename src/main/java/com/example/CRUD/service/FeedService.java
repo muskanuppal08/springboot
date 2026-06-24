@@ -24,6 +24,7 @@ public class FeedService {
 
     private PostResponseDto toDto(Post post){
         PostResponseDto dto = new PostResponseDto();
+        dto.setId(post.getId());
         dto.setUsername(post.getUser().getUsername());
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());

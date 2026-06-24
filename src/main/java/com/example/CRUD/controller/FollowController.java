@@ -34,4 +34,21 @@ public class FollowController {
 
         return "Follow status updated";
     }
+
+    @GetMapping("/requests")
+    public List<User> getPendingRequests(Authentication authentication) {
+        return followService.getPendingRequests(authentication.getName());
+    }
+
+    @PostMapping("/accept/{followerId}")
+    public String acceptFollowRequest(@PathVariable Long followerId, Authentication authentication) {
+        followService.acceptFollowRequest(followerId, authentication.getName());
+        return "Follow request accepted";
+    }
+
+    @PostMapping("/reject/{followerId}")
+    public String rejectFollowRequest(@PathVariable Long followerId, Authentication authentication) {
+        followService.rejectFollowRequest(followerId, authentication.getName());
+        return "Follow request rejected";
+    }
 }
