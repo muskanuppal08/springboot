@@ -42,6 +42,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {
         User user = userRepository.findByUsername(request.getUsername());
+        if (user == null) {
+            user = userRepository.findByEmail(request.getUsername());
+        }
         if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             if (user.getUserInfo().isTwoFactorEnabled()) {
                 String tempToken = jwtUtil.generateToken(user.getUsername(), "2FA_PENDING");
@@ -49,7 +52,7 @@ public class AuthController {
             }
 
             String token = jwtUtil.generateToken(
-                    request.getUsername(),
+                    user.getUsername(),
                     "USER"
             );
 
