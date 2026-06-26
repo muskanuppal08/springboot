@@ -19,6 +19,6 @@ public class UserDto {
     private String bio;
     private String website;
     private String headerPic;
-    private boolean verified;
-    private boolean twoFactorEnabled;
+    private Boolean verified = false;
+    private Boolean twoFactorEnabled = false;
 }

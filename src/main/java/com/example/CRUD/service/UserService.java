@@ -68,8 +68,8 @@ public class UserService {
         userInfo.setBio(userDto.getBio());
         userInfo.setWebsite(userDto.getWebsite());
         userInfo.setHeaderPic(userDto.getHeaderPic());
-        userInfo.setVerified(userDto.isVerified());
-        userInfo.setTwoFactorEnabled(userDto.isTwoFactorEnabled());
+        userInfo.setVerified(userDto.getVerified() != null && userDto.getVerified());
+        userInfo.setTwoFactorEnabled(userDto.getTwoFactorEnabled() != null && userDto.getTwoFactorEnabled());
         userInfo.setUser(user);
         user.setUserInfo(userInfo);
 
