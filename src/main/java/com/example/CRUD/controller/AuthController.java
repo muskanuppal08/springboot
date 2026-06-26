@@ -41,10 +41,27 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {
+        System.out.println("\n=== LOGIN ATTEMPT ===");
+        System.out.println("Input Username/Email: " + request.getUsername());
+
         User user = userRepository.findByUsername(request.getUsername());
         if (user == null) {
             user = userRepository.findByEmail(request.getUsername());
+            if (user != null) {
+                System.out.println("User found by Email: " + user.getUsername());
+            }
+        } else {
+            System.out.println("User found by Username: " + user.getUsername());
         }
+
+        if (user == null) {
+            System.out.println("Login Failed: User not found in database.");
+        } else {
+            boolean matches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+            System.out.println("Password Matches: " + matches);
+        }
+        System.out.println("=====================\n");
+
         if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             if (user.getUserInfo().isTwoFactorEnabled()) {
                 String tempToken = jwtUtil.generateToken(user.getUsername(), "2FA_PENDING");
